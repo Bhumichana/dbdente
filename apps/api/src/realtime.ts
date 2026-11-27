@@ -32,7 +32,13 @@ export function attachRealtime(server: HttpServer, origin: boolean | string[]) {
 export type RealtimeEvent =
   | { type: "queue:changed" }
   /** เรียกคิวขึ้นจอ: เลขคิว + ห้อง (ไม่มีชื่อเต็ม) */
-  | { type: "queue:call"; queueNo: string; chairName: string; maskedName: string };
+  | { type: "queue:call"; queueNo: string; chairName: string; maskedName: string }
+  /** บิล/ใบเสร็จ/ปิดยอดเปลี่ยน */
+  | { type: "billing:changed" }
+  /** เอกสารยินยอมของคนไข้เปลี่ยน (สร้าง/เซ็น/ยกเลิก) */
+  | { type: "consent:changed"; patientId: string }
+  /** ส่งเอกสารไปเปิดบนแท็บเล็ต Kiosk (ส่งแค่ id — แท็บเล็ตดึงเนื้อหาผ่าน API) */
+  | { type: "kiosk:open"; consentId: string };
 
 export function notify(clinicId: string, e: RealtimeEvent) {
   io?.to(`clinic:${clinicId}`).emit(e.type, e);

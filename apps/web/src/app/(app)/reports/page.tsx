@@ -1,5 +1,9 @@
-import { ComingSoon } from "@/components/shell/ComingSoon";
+"use client";
 
+import { Dashboard } from "@/components/reports/Dashboard";
+import { useRole } from "@/lib/session";
+
+// รอรู้บทบาทก่อน (เนื้อหาต่างกันตามบทบาท)
 export default function Page() {
-  return <ComingSoon href="/reports" />;
+  return useRole() ? <Dashboard /> : null;
 }

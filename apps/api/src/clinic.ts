@@ -5,6 +5,7 @@
 import crypto from "node:crypto";
 import type { Express, Response } from "express";
 import { requireRole, type AuthedRequest } from "./auth.js";
+import { ensureDraft, invoiceForAppointment } from "./billing.js";
 import type { Appointment, AppointmentStatus, Chair, ChairStatus, Patient, Role } from "./domain.js";
 import { notify } from "./realtime.js";
 import { audit, getDb, save } from "./store.js";
@@ -78,10 +79,13 @@ function nextHn(clinicId: string) {
 // ---------- appointments ----------
 const ACTIVE: AppointmentStatus[] = ["booked", "arrived", "in_room", "awaiting_payment", "done"];
 
-function view(a: Appointment) {
+/** showMoney: แนบยอดบิล (เฉพาะเจ้าของ/เคาน์เตอร์) */
+function view(a: Appointment, showMoney = false) {
   const db = getDb();
   const p = db.patients.find((x) => x.id === a.patientId);
+  const inv = showMoney ? invoiceForAppointment(a.id) : undefined;
   return {
+    invoice: inv && { id: inv.id, status: inv.status, total: inv.total, receiptNo: inv.receiptNo },
     ...a,
     end: `${a.start.slice(0, 11)}${hhmm(minutesOf(a.start) + a.durationMin)}`,
     patient: p && {
@@ -148,7 +152,7 @@ const TRANSITIONS: Record<string, Role[]> = {
   "arrived>cancelled": ["owner", "receptionist"],
   "arrived>in_room": ["owner", "dentist", "receptionist", "assistant"],
   "in_room>awaiting_payment": ["owner", "dentist", "receptionist", "assistant"],
-  "awaiting_payment>done": ["owner", "receptionist"],
+  // awaiting_payment → done เกิดจากการรับชำระในหน้าการเงินเท่านั้น
 };
 
 function setChair(chair: Chair | undefined, status: ChairStatus) {
@@ -238,13 +242,15 @@ export function registerClinicRoutes(app: Express) {
   });
 
   app.get("/api/appointments", (req: AuthedRequest, res) => {
+    const money = req.user!.role === "owner" || req.user!.role === "receptionist";
+    const v = (a: Appointment) => view(a, money);
     // นัดทั้งหมดของคนไข้รายเดียว (แฟ้มคนไข้)
     if (req.query.patientId) {
       return void res.json(
         getDb()
           .appointments.filter((a) => a.clinicId === req.user!.clinicId && a.patientId === req.query.patientId)
           .sort((a, b) => b.start.localeCompare(a.start))
-          .map(view),
+          .map(v),
       );
     }
     const date = String(req.query.date ?? todayLocal());
@@ -256,7 +262,7 @@ export function registerClinicRoutes(app: Express) {
       getDb()
         .appointments.filter((a) => a.clinicId === req.user!.clinicId && a.start >= date && a.start < end)
         .sort((a, b) => a.start.localeCompare(b.start))
-        .map(view),
+        .map(v),
     );
   });
 
@@ -327,12 +333,14 @@ export function registerClinicRoutes(app: Express) {
     if (to === "awaiting_payment") {
       a.finishedAt = now;
       setChair(db.chairs.find((c) => c.id === a.chairId), "preparing"); // ผู้ช่วยทำความสะอาด/เตรียมห้องต่อ
+      ensureDraft(a, req.user!.id); // เปิดบิลร่างจากหัตถการที่ทำเสร็จ ให้เคาน์เตอร์รับชำระต่อ
     }
     a.status = to;
     a.updatedAt = now;
     save();
     audit({ ...ctx(req), action: "QUEUE_STATUS", patientId: a.patientId, target: `${a.id}:${to}` });
     notify(a.clinicId, { type: "queue:changed" });
+    if (to === "awaiting_payment") notify(a.clinicId, { type: "billing:changed" });
     if (to === "in_room") callOut(a);
     res.json(view(a));
   });

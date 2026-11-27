@@ -9,7 +9,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/feedback";
 import { Toaster } from "@/components/ui/toast";
 import { cn } from "@/lib/cn";
-import { navFor, navItemFor } from "@/lib/nav";
+import { useKioskLock } from "@/lib/kiosk";
+import { homeFor, navFor, navItemFor } from "@/lib/nav";
 import { useHydrated, useSession } from "@/lib/session";
 import { ROLE_LABEL, type User } from "@/lib/types";
 import { PatientSearch } from "./PatientSearch";
@@ -34,9 +35,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
+  const kiosk = useKioskLock();
   useEffect(() => {
     if (hydrated && !token) router.replace("/");
-  }, [hydrated, token, router]);
+    else if (kiosk) router.replace("/kiosk"); // แท็บเล็ตที่ล็อกโหมด Kiosk ไว้ เข้าเมนูอื่นไม่ได้
+  }, [hydrated, token, kiosk, router]);
 
   // Ctrl/⌘ + K = ค้นหาคนไข้ จากทุกหน้า
   useEffect(() => {
@@ -52,7 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   // ก่อน hydrate (รวมตอน render บน server) ยังไม่รู้ว่าใคร login → วาดโครงและหน้าไว้ก่อน เมนูตามบทบาทเติมทีหลัง
   // หลัง hydrate ถ้าไม่มี session จะไม่แสดงเนื้อหา และ effect ด้านบนพาไปหน้า login
-  const signedOut = hydrated && (!token || !user);
+  const signedOut = hydrated && (!token || !user || kiosk);
   const me = hydrated ? user : null; // server กับ render แรกของ browser ต้องตรงกัน (กัน hydration mismatch)
   const item = navItemFor(pathname);
   const allowed = !me || !item || item.roles.includes(me.role);
@@ -60,10 +63,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <SlotContext.Provider value={slot}>
-      <div className="flex h-dvh">
+      <div className="flex h-dvh print:block print:h-auto">
         <aside
           className={cn(
-            "hidden shrink-0 flex-col bg-navy-950 text-navy-200 md:flex",
+            "hidden shrink-0 flex-col bg-navy-950 text-navy-200 md:flex print:hidden",
             compact ? "w-16" : "w-16 xl:w-60",
           )}
         >
@@ -71,7 +74,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-14 shrink-0 items-center gap-3 border-b border-ink-200 bg-white px-3 sm:px-4">
+          <header className="flex h-14 shrink-0 items-center gap-3 border-b border-ink-200 bg-white px-3 sm:px-4 print:hidden">
             <button
               aria-label="เปิดเมนู"
               onClick={() => setMenuOpen(true)}
@@ -96,7 +99,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
           </header>
 
-          <main className="relative min-h-0 flex-1 overflow-y-auto">
+          <main className="relative min-h-0 flex-1 overflow-y-auto print:overflow-visible">
             {signedOut ? null : allowed ? (
               children
             ) : (
@@ -153,7 +156,7 @@ function SidebarBody({
   return (
     <div className="flex h-full flex-col pb-[env(safe-area-inset-bottom)]">
       <Link
-        href="/queue"
+        href={homeFor(user?.role)}
         onClick={onNavigate}
         className={cn("flex h-14 shrink-0 items-center gap-2.5 px-3.5", center)}
         title={user?.clinicName}

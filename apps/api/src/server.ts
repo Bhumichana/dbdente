@@ -3,8 +3,16 @@ import cors from "cors";
 import express, { type NextFunction, type Response } from "express";
 import multer from "multer";
 import { requireAuth, requireRole, signToken, type AuthedRequest } from "./auth.js";
+import { registerBillingRoutes } from "./billing.js";
+import { registerBridgeDeviceRoutes, registerBridgeRoutes } from "./bridge.js";
 import { registerClinicRoutes } from "./clinic.js";
+import { registerConsentRoutes } from "./consent.js";
 import { config } from "./config.js";
+import { registerDfRoutes } from "./df.js";
+import { registerLabRoutes } from "./lab.js";
+import { registerPlanRoutes } from "./plans.js";
+import { registerReportRoutes } from "./reports.js";
+import { registerStockRoutes } from "./stock.js";
 import {
   dicomPatientId,
   type FilmType,
@@ -27,7 +35,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 
 const app = express();
 const corsOrigin = config.webOrigin.includes("*") ? true : config.webOrigin;
 app.use(cors({ origin: corsOrigin, exposedHeaders: ["Content-Length"] }));
-app.use(express.json());
+app.use(express.json({ limit: "1mb" })); // ลายเซ็น E-Consent เป็นภาพ PNG
 
 const CLINICAL = ["owner", "dentist", "assistant"] as const;
 const FILM_TYPES: FilmType[] = ["PA", "BW", "PANO", "CEPH", "OTHER"];
@@ -83,6 +91,9 @@ app.post("/api/auth/demo-login", (req, res) => {
   audit({ userId: user.id, clinicId: user.clinicId, action: "LOGIN", ip: req.ip });
   res.json({ token: signToken(user), user });
 });
+
+// Local Bridge ใช้ token ประจำเครื่อง (ไม่ใช่ JWT ผู้ใช้) จึงลงทะเบียนก่อน requireAuth
+registerBridgeDeviceRoutes(app);
 
 app.use("/api", requireAuth);
 
@@ -356,6 +367,14 @@ app.post(
 
 // ---------- หน้าร้าน: ทะเบียน / นัดหมาย / คิว / เก้าอี้ ----------
 registerClinicRoutes(app);
+registerBillingRoutes(app);
+registerConsentRoutes(app);
+registerPlanRoutes(app);
+registerDfRoutes(app);
+registerLabRoutes(app);
+registerStockRoutes(app);
+registerBridgeRoutes(app);
+registerReportRoutes(app);
 
 // ---------- audit ----------
 app.get("/api/audit", requireRole("owner"), (req: AuthedRequest, res) => {

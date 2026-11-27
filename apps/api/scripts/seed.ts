@@ -19,6 +19,9 @@ import {
   type Patient,
   type ToothRecord,
 } from "../src/domain.js";
+import { draftItems, invoiceTotal } from "../src/billing.js";
+import { sha256 } from "../src/consent.js";
+import { seedOperations } from "./seed-ops.js";
 import { createImageSource } from "../src/imaging/index.js";
 import { replaceDb } from "../src/store.js";
 import { bitewingRight, pa11, pa36, panoramic } from "./synth.js";
@@ -34,7 +37,15 @@ const uid = (key: string) => {
   return `2.25.${BigInt("0x" + hex).toString()}`;
 };
 
-const clinic: Clinic = { id: "c1", code: "DEMO01", name: "คลินิกทันตกรรมยิ้มสวย (เดโม)" };
+const clinic: Clinic = {
+  id: "c1",
+  code: "DEMO01",
+  name: "คลินิกทันตกรรมยิ้มสวย (เดโม)",
+  address: "99/9 ถนนสุขุมวิท แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพฯ 10110",
+  taxId: "0000000000000",
+  phone: "02-000-0000",
+  kioskPinHash: sha256("2468"), // PIN เดโมสำหรับออกจากโหมด Kiosk
+};
 
 const patients: Patient[] = [
   {
@@ -135,6 +146,19 @@ const db: Db = {
   notes: [],
   chairs: [],
   appointments: [],
+  procedures: [],
+  invoices: [],
+  closes: [],
+  consentTemplates: [],
+  consents: [],
+  dfRules: [],
+  plans: [],
+  labs: [],
+  labCases: [],
+  stockItems: [],
+  stockMoves: [],
+  bridges: [],
+  bridgeFiles: [],
 };
 
 // ---------- เก้าอี้ + นัดหมายของวันนี้/พรุ่งนี้ (สถานะเหมือนช่วงสายของวัน) ----------
@@ -198,6 +222,138 @@ db.appointments = [
   appt(tomorrow, "09:30", 60, "p6", "u1", "ch2", "ยึดครอบฟัน 26", "booked"),
   appt(tomorrow, "10:00", 30, "p8", "u2", "ch1", "ตรวจติดตามผล", "booked"),
   appt(tomorrow, "13:30", 60, "p7", "u5", "ch3", "ปรับลวดจัดฟัน", "booked"),
+];
+
+// ---------- รายการหัตถการและราคา (บาท → สตางค์) ----------
+const proc = (code: string, category: string, name: string, baht: number, keywords: string[]) => ({
+  id: `pr-${code.toLowerCase()}`,
+  clinicId: clinic.id,
+  code,
+  category,
+  name,
+  price: baht * 100,
+  keywords,
+});
+db.procedures = [
+  proc("EXAM", "ตรวจและวินิจฉัย", "ตรวจสุขภาพช่องปาก", 300, ["ตรวจ", "exam"]),
+  proc("PA", "ตรวจและวินิจฉัย", "ถ่ายภาพรังสี PA", 200, ["ฟิล์ม pa", "periapical"]),
+  proc("PANO", "ตรวจและวินิจฉัย", "ถ่ายภาพรังสี Panoramic", 800, ["panoramic", "pano"]),
+  proc("SCALE", "ป้องกัน", "ขูดหินปูนและขัดฟัน", 800, ["ขูดหินปูน", "scaling"]),
+  proc("FLUOR", "ป้องกัน", "เคลือบฟลูออไรด์", 400, ["ฟลูออไรด์", "fluoride"]),
+  proc("SEAL", "ป้องกัน", "เคลือบหลุมร่องฟัน (Sealant)", 500, ["sealant"]),
+  proc("COMP1", "อุดฟัน", "อุดฟัน Composite 1 ด้าน", 900, ["composite", "อุด"]),
+  proc("COMP2", "อุดฟัน", "อุดฟัน Composite 2 ด้าน", 1200, []),
+  proc("EXT", "ศัลยกรรม", "ถอนฟัน", 800, ["ถอน", "extraction"]),
+  proc("SURG", "ศัลยกรรม", "ผ่าฟันคุด", 3500, ["ผ่าฟันคุด", "impact"]),
+  proc("RCTM", "รักษารากฟัน", "รักษารากฟัน (ฟันกราม)", 7000, ["rct", "รักษาราก", "root canal"]),
+  proc("CROWN", "ทันตกรรมประดิษฐ์", "ครอบฟันเซรามิก (PFM)", 12000, ["ครอบ", "crown"]),
+  proc("ORTHO", "จัดฟัน", "ปรับเครื่องมือจัดฟัน (รายเดือน)", 1500, ["ปรับลวด", "จัดฟัน"]),
+  proc("MED", "ยาและอื่นๆ", "ยา Paracetamol 500 mg × 10", 50, []),
+];
+
+// ---------- บิล: visit ที่จบแล้ววันนี้ชำระแล้ว 2 ใบ, รอชำระ 1 ใบ ----------
+for (const [pid, method] of [["p4", "cash"], ["p5", "transfer"]] as const) {
+  const a = db.appointments.find((x) => x.patientId === pid && x.status === "done")!;
+  const items = draftItems(db, a);
+  const total = invoiceTotal(items);
+  const paidAt = new Date(new Date(a.calledAt!).getTime() + a.durationMin * 60_000).toISOString();
+  db.invoices.push({
+    id: uid(`inv:${a.id}`).slice(-16),
+    clinicId: clinic.id,
+    patientId: pid,
+    appointmentId: a.id,
+    status: "paid",
+    items,
+    payments: method === "cash" ? [{ method, amount: total, received: Math.ceil(total / 100_000) * 100_000 }] : [{ method, amount: total, ref: "PromptPay 0042" }],
+    total,
+    paidAt,
+    paidBy: "u3",
+    createdBy: a.dentistId,
+    createdAt: paidAt,
+    updatedAt: paidAt,
+  });
+}
+{
+  const a = db.appointments.find((x) => x.status === "awaiting_payment")!;
+  const items = draftItems(db, a);
+  db.invoices.push({
+    id: uid(`inv:${a.id}`).slice(-16),
+    clinicId: clinic.id,
+    patientId: a.patientId,
+    appointmentId: a.id,
+    status: "draft",
+    items,
+    payments: [],
+    total: invoiceTotal(items),
+    createdBy: a.dentistId,
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
+// ---------- Phase 2–3: ประวัติย้อนหลัง, แผนผ่อน, มัดจำ, DF, แล็บ, สต็อก, Bridge (+ ออกเลขใบเสร็จ/ปิดยอดวันก่อนๆ) ----------
+seedOperations(db, { clinicId: clinic.id, today, uid });
+
+// ---------- เทมเพลตเอกสารยินยอม (ข้อความตัวอย่าง — ใช้จริงต้องให้ที่ปรึกษากฎหมายตรวจ) ----------
+const PDPA_CHECKS = [
+  { id: "treat", label: "ข้าพเจ้ายินยอมรับการรักษาตามที่ระบุ", required: true },
+  { id: "health", label: "ยินยอมให้คลินิกเก็บและใช้ข้อมูลสุขภาพ รวมถึงภาพรังสี เพื่อการรักษา (PDPA)", required: true },
+  { id: "line", label: "ยินยอมรับข่าวสารและการแจ้งเตือนนัดทาง LINE (ไม่บังคับ)", required: false },
+];
+const COMMON = [
+  "ข้าพเจ้าได้รับคำอธิบายเรื่องค่าใช้จ่ายโดยประมาณ และทราบว่าค่าใช้จ่ายอาจเปลี่ยนแปลงได้หากพบสภาวะที่ไม่คาดคิดระหว่างการรักษา",
+  "ข้าพเจ้าเข้าใจว่าอาจต้องถ่ายภาพรังสีเพิ่มเติมระหว่างการรักษา และภาพดังกล่าวจะถูกจัดเก็บเป็นส่วนหนึ่งของเวชระเบียน",
+  "ข้าพเจ้ามีโอกาสซักถามจนเข้าใจ และสามารถเปลี่ยนใจไม่รับการรักษาได้ก่อนเริ่มหัตถการ",
+];
+db.consentTemplates = [
+  {
+    id: "ct-general",
+    clinicId: clinic.id,
+    title: "หนังสือยินยอมรับการรักษาทางทันตกรรม",
+    body: [
+      "ข้าพเจ้า {patient} ยินยอมรับการรักษา “{procedure}” {teeth} ที่ {clinic} โดย {dentist}",
+      "ข้าพเจ้าได้รับคำอธิบายจากทันตแพทย์ถึงขั้นตอน ระยะเวลา ผลข้างเคียงที่อาจเกิดขึ้น และทางเลือกอื่นในการรักษาแล้ว",
+      ...COMMON,
+    ],
+    checks: PDPA_CHECKS,
+  },
+  {
+    id: "ct-rct",
+    clinicId: clinic.id,
+    title: "หนังสือยินยอมการรักษาคลองรากฟัน (Root Canal Treatment)",
+    body: [
+      "ข้าพเจ้า {patient} ยินยอมรับการรักษาคลองรากฟัน {teeth} โดย {dentist}",
+      "ทันตแพทย์อธิบายแล้วว่าการรักษาคลองรากฟันมักต้องมาหลายครั้ง และหลังรักษาอาจมีอาการเจ็บเมื่อเคี้ยวได้ 2–3 วัน",
+      "ข้าพเจ้าทราบว่าเครื่องมือขนาดเล็กอาจหักค้างในคลองราก หรือพบคลองรากที่ตีบตัน ซึ่งอาจต้องรักษาเพิ่มเติมหรือส่งต่อทันตแพทย์เฉพาะทาง",
+      "ฟันที่รักษาคลองรากแล้วจะเปราะกว่าเดิม ทันตแพทย์แนะนำให้ทำครอบฟันเพื่อป้องกันฟันแตก",
+      ...COMMON,
+    ],
+    checks: PDPA_CHECKS,
+  },
+  {
+    id: "ct-ext",
+    clinicId: clinic.id,
+    title: "หนังสือยินยอมการถอนฟัน / ผ่าฟันคุด",
+    body: [
+      "ข้าพเจ้า {patient} ยินยอมรับการ “{procedure}” {teeth} โดย {dentist}",
+      "ทันตแพทย์อธิบายแล้วว่าหลังถอนฟันหรือผ่าฟันคุดอาจมีอาการปวด บวม เลือดซึม หรืออ้าปากได้น้อยลงชั่วคราว",
+      "ในบางกรณีอาจเกิดอาการชาริมฝีปากหรือลิ้นจากการที่รากฟันอยู่ใกล้เส้นประสาท ซึ่งส่วนใหญ่หายได้เอง",
+      "ข้าพเจ้าได้แจ้งประวัติการแพ้ยา โรคประจำตัว และยาที่ใช้อยู่ (เช่น ยาละลายลิ่มเลือด) ให้ทันตแพทย์ทราบครบถ้วนแล้ว",
+      ...COMMON,
+    ],
+    checks: PDPA_CHECKS,
+  },
+  {
+    id: "ct-pdpa",
+    clinicId: clinic.id,
+    title: "หนังสือให้ความยินยอมเก็บรวบรวมและใช้ข้อมูลส่วนบุคคล (PDPA)",
+    body: [
+      "ข้าพเจ้า {patient} รับทราบว่า {clinic} เก็บข้อมูลส่วนบุคคลและข้อมูลสุขภาพ ได้แก่ ประวัติการรักษา ผังฟัน และภาพรังสี เพื่อใช้ในการรักษาและติดต่อนัดหมาย",
+      "คลินิกจะไม่เปิดเผยข้อมูลแก่บุคคลภายนอก เว้นแต่ได้รับความยินยอม หรือเป็นไปตามที่กฎหมายกำหนด",
+      "ข้าพเจ้ามีสิทธิ์ขอเข้าถึง ขอสำเนา ขอแก้ไข และขอถอนความยินยอมได้ โดยแจ้งที่เคาน์เตอร์ของคลินิก",
+    ],
+    checks: PDPA_CHECKS.slice(1),
+  },
 ];
 
 // ---------- SOAP notes (visit ที่ผ่านมา — ลงนามแล้ว) ----------

@@ -15,6 +15,7 @@ import { api } from "@/lib/api";
 import { minutesSince, nowLocal, useClinicRefs } from "@/lib/clinic";
 import { cn } from "@/lib/cn";
 import { thaiDate } from "@/lib/format";
+import { baht } from "@/lib/money";
 import { useRealtime } from "@/lib/realtime";
 import { useRole, useSession } from "@/lib/session";
 import { CHAIR_STATUS, type Appointment, type AppointmentStatus, type Chair, type ChairStatus } from "@/lib/types";
@@ -257,11 +258,17 @@ export function QueueBoard() {
                           </Button>
                         </>
                       )}
-                      {col.status === "awaiting_payment" && front && (
-                        <Button size="sm" disabled={busy === a.id} onClick={() => move(a, "done", {}, `${a.patient?.fullName} ชำระเงินแล้ว`)} title="ระบบออกบิลจริงอยู่ในขั้นถัดไป">
+                      {col.status === "awaiting_payment" && front && a.invoice && (
+                        <Link href={`/billing?id=${a.invoice.id}`} className={buttonClass("primary", "sm")}>
                           <Receipt />
-                          รับชำระแล้ว
-                        </Button>
+                          รับชำระ <span className="font-mono">฿{baht(a.invoice.total)}</span>
+                        </Link>
+                      )}
+                      {col.status === "done" && front && a.invoice?.receiptNo && (
+                        <Link href={`/billing/receipt/${a.invoice.id}`} className={buttonClass("ghost", "sm")}>
+                          <Receipt />
+                          <span className="font-mono">{a.invoice.receiptNo}</span>
+                        </Link>
                       )}
                       {role !== "receptionist" && col.status !== "done" && (
                         <Link href={`/patients/${a.patientId}`} className={buttonClass("ghost", "sm")}>

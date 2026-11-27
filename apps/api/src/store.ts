@@ -6,7 +6,7 @@ import type { AuditEntry, Db } from "./domain.js";
 const dbFile = path.join(config.dataDir, "db.json");
 const auditFile = path.join(config.dataDir, "audit.log");
 
-const empty: Db = { clinics: [], users: [], patients: [], charts: {}, imageLinks: {}, notes: [], chairs: [], appointments: [] };
+const empty: Db = { clinics: [], users: [], patients: [], charts: {}, imageLinks: {}, notes: [], chairs: [], appointments: [], procedures: [], invoices: [], closes: [], consentTemplates: [], consents: [], dfRules: [], plans: [], labs: [], labCases: [], stockItems: [], stockMoves: [], bridges: [], bridgeFiles: [] };
 
 let db: Db = load();
 

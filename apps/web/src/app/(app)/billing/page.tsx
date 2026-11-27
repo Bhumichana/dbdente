@@ -1,5 +1,10 @@
-import { ComingSoon } from "@/components/shell/ComingSoon";
+import { Suspense } from "react";
+import { BillingWorkspace } from "@/components/billing/BillingWorkspace";
 
-export default function Page() {
-  return <ComingSoon href="/billing" />;
+export default function BillingPage() {
+  return (
+    <Suspense fallback={null}>
+      <BillingWorkspace />
+    </Suspense>
+  );
 }

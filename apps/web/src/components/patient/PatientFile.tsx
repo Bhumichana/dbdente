@@ -14,6 +14,8 @@ import { api, ApiError } from "@/lib/api";
 import { todayTH } from "@/lib/format";
 import { useSession } from "@/lib/session";
 import type { Appointment, Patient, Role, SoapNote, ToothRecord, XrayImage } from "@/lib/types";
+import { PatientBilling } from "@/components/billing/PatientBilling";
+import { PatientConsents } from "@/components/consent/PatientConsents";
 import { OverviewTab, SoapTab, SoonPanel, TodayNotePanel } from "./panels";
 import { TreatmentWorkspace } from "./TreatmentWorkspace";
 
@@ -219,19 +221,13 @@ export function PatientFile() {
           </>
         )}
 
-        <TabsContent value="billing" className="overflow-y-auto">
-          <SoonPanel
-            title="การเงินของคนไข้"
-            phase="Phase 1"
-            items={["บิลและใบเสร็จย้อนหลัง", "ยอดค้างชำระ และมัดจำคงเหลือ", "แผนผ่อนชำระ (จัดฟัน / รากเทียม) — Phase 2"]}
-          />
-        </TabsContent>
+        {role === "owner" || role === "receptionist" ? (
+          <TabsContent value="billing" className="overflow-y-auto">
+            <PatientBilling patient={patient} />
+          </TabsContent>
+        ) : null}
         <TabsContent value="consent" className="overflow-y-auto">
-          <SoonPanel
-            title="เอกสารยินยอม (E-Consent)"
-            phase="Phase 1"
-            items={["หนังสือยินยอมรับการรักษาตามหัตถการ", "ความยินยอม PDPA", "เซ็นบนแท็บเล็ตในโหมด Kiosk เก็บเป็น PDF"]}
-          />
+          <PatientConsents patientId={id} />
         </TabsContent>
       </Tabs>
     </div>

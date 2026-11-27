@@ -45,3 +45,14 @@ export async function fetchBlobUrl(path: string) {
 
 export const imageFileUrl = (patientId: string, sop: string) =>
   `${apiBase()}/api/patients/${patientId}/images/${sop}/file`;
+
+/** ดาวน์โหลดไฟล์จาก API (แนบ Authorization) แล้วบันทึกลงเครื่อง */
+export async function downloadFile(path: string, filename: string) {
+  const token = useSession.getState().token;
+  const res = await fetch(`${apiBase()}${path}`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new ApiError(res.status, (await res.json().catch(() => ({}))).error ?? res.statusText);
+  const url = URL.createObjectURL(await res.blob());
+  const a = Object.assign(document.createElement("a"), { href: url, download: filename });
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}

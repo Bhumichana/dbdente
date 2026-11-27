@@ -1,5 +1,6 @@
 "use client";
 
+import { homeFor } from "@/lib/nav";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -16,13 +17,13 @@ const ROLE_HINT: Record<User["role"], string> = {
 export default function DemoLogin() {
   const router = useRouter();
   const hydrated = useHydrated();
-  const { token, setSession } = useSession();
+  const { token, user, setSession } = useSession();
   const [users, setUsers] = useState<User[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (hydrated && token) router.replace("/queue");
-  }, [hydrated, token, router]);
+    if (hydrated && token) router.replace(homeFor(user?.role));
+  }, [hydrated, token, user, router]);
 
   useEffect(() => {
     api<User[]>("/api/auth/demo-users")
@@ -36,7 +37,7 @@ export default function DemoLogin() {
       body: JSON.stringify({ userId: u.id }),
     });
     setSession(r.token, { ...r.user, clinicName: u.clinicName });
-    router.push("/queue"); // หน้าแรกของทุกบทบาท = งานของวันนี้
+    router.push(homeFor(r.user.role)); // เจ้าของ = Dashboard · คนอื่น = คิววันนี้
   }
 
   return (

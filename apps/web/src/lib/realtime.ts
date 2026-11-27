@@ -62,3 +62,40 @@ export function useRealtime(onChange: () => void, onCall?: (c: QueueCall) => voi
 
   return connected;
 }
+
+/**
+ * ฟังสัญญาณ real-time ตามชื่อ เช่น "billing:changed", "consent:changed", "kiosk:open"
+ * ต่อกลับมาหลังหลุด → เรียก onReconnect (ถ้ามี) ให้หน้าจอดึงข้อมูลใหม่
+ */
+export function useSocketEvent<T = unknown>(event: string, handler: (payload: T) => void, onReconnect?: () => void) {
+  const token = useSession((s) => s.token);
+  const [connected, setConnected] = useState(false);
+  const ref = useRef({ handler, onReconnect });
+  useEffect(() => {
+    ref.current = { handler, onReconnect };
+  });
+
+  useEffect(() => {
+    if (!token) return;
+    const s = getSocket(token);
+    const on = (p: T) => ref.current.handler(p);
+    const up = () => {
+      setConnected(true);
+      ref.current.onReconnect?.();
+    };
+    const down = () => setConnected(false);
+    s.on(event, on);
+    s.on("connect", up);
+    s.on("disconnect", down);
+    s.on("connect_error", down);
+    if (s.connected) setTimeout(() => setConnected(true), 0);
+    return () => {
+      s.off(event, on);
+      s.off("connect", up);
+      s.off("disconnect", down);
+      s.off("connect_error", down);
+    };
+  }, [token, event]);
+
+  return connected;
+}
