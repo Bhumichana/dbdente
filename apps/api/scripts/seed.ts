@@ -98,7 +98,59 @@ const db: Db = {
     },
   },
   imageLinks: {},
+  notes: [],
 };
+
+// ---------- SOAP notes (visit ที่ผ่านมา — ลงนามแล้ว) ----------
+const note = (
+  patientId: string,
+  visitDate: string,
+  teeth: number[],
+  soap: { s: string; o: string; a: string; p: string },
+): Db["notes"][number] => {
+  const at = `${visitDate}T10:30:00.000Z`;
+  return {
+    id: uid(`note:${patientId}:${visitDate}`).slice(-16),
+    clinicId: clinic.id,
+    patientId,
+    visitDate,
+    subjective: soap.s,
+    objective: soap.o,
+    assessment: soap.a,
+    plan: soap.p,
+    teeth,
+    authorId: "u2",
+    createdAt: at,
+    updatedAt: at,
+    signedAt: at,
+  };
+};
+db.notes.push(
+  note("p1", "2025-11-03", [], {
+    s: "มาตรวจสุขภาพช่องปากประจำปี ไม่มีอาการปวด",
+    o: "ฟันผุซี่ 45 ด้าน D, 11 ด้าน M ระยะเริ่มต้น · หินปูนเล็กน้อย · 17 ถอนไปแล้ว",
+    a: "Initial caries 45D, 11M · Mild gingivitis",
+    p: "ขูดหินปูนวันนี้ · นัดอุดฟัน 45, 11 · ถ่าย Panoramic เก็บเป็นข้อมูลพื้นฐาน",
+  }),
+  note("p1", "2026-05-12", [36], {
+    s: "ปวดฟันกรามล่างซ้ายเวลาเคี้ยว ปวดตอนกลางคืน 1 สัปดาห์",
+    o: "36 ผุลึกด้าน MO · เคาะเจ็บ (+) · Cold test ปวดค้าง · PA: periapical radiolucency ที่รากใกล้กลาง",
+    a: "Symptomatic irreversible pulpitis with apical periodontitis 36",
+    p: "เปิดโพรงประสาทฟัน ทำความสะอาดคลองราก (RCT ครั้งที่ 1) · ใส่ยา Ca(OH)₂ · แจ้งว่าแพ้ Penicillin จ่าย Clindamycin แทน",
+  }),
+  note("p1", "2026-08-20", [36], {
+    s: "ไม่ปวดแล้ว เคี้ยวได้ปกติ",
+    o: "36 เคาะไม่เจ็บ เหงือกปกติ · PA หลังอุดคลองราก: อุดได้ความยาวเหมาะสม",
+    a: "Previously initiated therapy 36 — healing",
+    p: "อุดคลองราก (Obturation) + ครอบฟัน · นัดติดตามผล PA 3 เดือน",
+  }),
+  note("p2", "2026-10-01", [46, 38], {
+    s: "เสียวฟันล่างขวาเวลาดื่มน้ำเย็น · ตั้งครรภ์ 20 สัปดาห์",
+    o: "46 ผุด้าน DO ปานกลาง · 38 คุดเอียงตัว (Panoramic)",
+    a: "Moderate caries 46DO · Impacted 38 (ยังไม่มีอาการ)",
+    p: "อุด Composite 46 DO ในไตรมาสที่ 2 · เลื่อนผ่าฟันคุด 38 ไปหลังคลอด",
+  }),
+);
 
 // ---------- DICOM writer ----------
 const SOP_CLASS = {

@@ -54,6 +54,22 @@ export interface AuditEntry {
   ip?: string;
 }
 
+export interface SoapNote {
+  id: string;
+  patientId: string;
+  visitDate: string; // YYYY-MM-DD
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+  teeth: number[];
+  authorId: string;
+  authorName?: string;
+  createdAt: string;
+  updatedAt: string;
+  signedAt?: string;
+}
+
 export const ROLE_LABEL: Record<Role, string> = {
   owner: "เจ้าของคลินิก",
   dentist: "ทันตแพทย์",

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { toast } from "@/components/ui/toast";
 import { api, fetchBlobUrl } from "@/lib/api";
+import { cn } from "@/lib/cn";
 import { FILM_LABEL, type FilmType, type XrayImage } from "@/lib/types";
 
 const fmtDate = (d: string) => (d.length === 8 ? `${d.slice(6, 8)}/${d.slice(4, 6)}/${d.slice(2, 4)}` : d);
@@ -33,9 +35,23 @@ interface Props {
   canLink: boolean;
   onOpen: (sops: string[]) => void;
   onChanged: () => void;
+  /** strip = แถบแนวนอนเหนือ Viewer · grid = คอลัมน์ 2 ภาพ (แผงขวาของห้องตรวจ) */
+  layout?: "strip" | "grid";
+  className?: string;
 }
 
-export function XrayGallery({ patientId, images, selectedTooth, openSops, canUpload, canLink, onOpen, onChanged }: Props) {
+export function XrayGallery({
+  patientId,
+  images,
+  selectedTooth,
+  openSops,
+  canUpload,
+  canLink,
+  onOpen,
+  onChanged,
+  layout = "strip",
+  className,
+}: Props) {
   const [type, setType] = useState<FilmType | "ALL">("ALL");
   const [compare, setCompare] = useState<string[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
@@ -86,7 +102,7 @@ export function XrayGallery({ patientId, images, selectedTooth, openSops, canUpl
       onChanged();
       if (last) onOpen([last.sopInstanceUid]);
     } catch (e) {
-      alert((e as Error).message);
+      toast((e as Error).message, "error");
     } finally {
       setBusy(null);
       if (fileRef.current) fileRef.current.value = "";
@@ -94,7 +110,7 @@ export function XrayGallery({ patientId, images, selectedTooth, openSops, canUpl
   }
 
   return (
-    <div className="flex flex-col gap-2 bg-viewer-panel p-2 text-ink-100">
+    <div className={cn("flex min-h-0 flex-col gap-2 bg-viewer-panel p-2 text-ink-100", className)}>
       <div className="flex flex-wrap items-center gap-1.5 text-xs">
         <span className="mr-1 font-semibold text-sm">
           ฟิล์ม X-ray {selectedTooth && !showAll ? `· ซี่ ${selectedTooth} + ภาพรวม` : "ทั้งหมด"}
@@ -161,7 +177,7 @@ export function XrayGallery({ patientId, images, selectedTooth, openSops, canUpl
           {selectedTooth ? `ยังไม่มีฟิล์มที่ผูกกับซี่ ${selectedTooth}` : "ยังไม่มีฟิล์มของคนไข้รายนี้"}
         </div>
       ) : (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className={layout === "grid" ? "grid min-h-0 grid-cols-2 content-start gap-2 overflow-y-auto pb-1" : "flex gap-2 overflow-x-auto pb-1"}>
           {list.map((img) => {
             const isOpen = openSops.includes(img.sopInstanceUid);
             const inCompare = compare.includes(img.sopInstanceUid);
@@ -169,9 +185,11 @@ export function XrayGallery({ patientId, images, selectedTooth, openSops, canUpl
             return (
               <div
                 key={img.sopInstanceUid}
-                className={`relative w-32 shrink-0 overflow-hidden rounded-lg bg-black ring-2 ${
-                  isOpen ? "ring-navy-500" : "ring-transparent"
-                }`}
+                className={cn(
+                  "relative shrink-0 overflow-hidden rounded-lg bg-black ring-2",
+                  layout === "strip" && "w-32",
+                  isOpen ? "ring-navy-500" : "ring-transparent",
+                )}
               >
                 <button onClick={() => onOpen([img.sopInstanceUid])} className="block h-24 w-full" title="เปิดใน Viewer">
                   <Thumb patientId={patientId} sop={img.sopInstanceUid} />

@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import cors from "cors";
 import express, { type NextFunction, type Response } from "express";
 import multer from "multer";
@@ -7,6 +8,7 @@ import {
   dicomPatientId,
   type FilmType,
   type Patient,
+  type SoapNote,
   type Surface,
   type ToothRecord,
   type ToothStatus,
@@ -148,6 +150,88 @@ app.put(
     res.json(db.charts[p.id][tooth] ?? null);
   },
 );
+
+// ---------- SOAP notes ----------
+const todayTH = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Bangkok" }); // YYYY-MM-DD
+const text = (v: unknown, max = 4000) => (typeof v === "string" ? v.slice(0, max) : "");
+
+function noteView(n: SoapNote) {
+  return { ...n, authorName: getDb().users.find((u) => u.id === n.authorId)?.name };
+}
+
+function noteOf(req: AuthedRequest, res: Response, p: Patient): SoapNote | null {
+  const n = getDb().notes.find((x) => x.id === req.params.noteId && x.patientId === p.id);
+  if (!n) return void res.status(404).json({ error: "ไม่พบบันทึก" }), null;
+  if (n.authorId !== req.user!.id) return void res.status(403).json({ error: "แก้ไขได้เฉพาะผู้เขียนบันทึก" }), null;
+  if (n.signedAt) return void res.status(409).json({ error: "บันทึกนี้ลงนามแล้ว แก้ไขไม่ได้" }), null;
+  return n;
+}
+
+function applyNoteBody(n: SoapNote, body: Record<string, unknown>) {
+  n.subjective = text(body.subjective);
+  n.objective = text(body.objective);
+  n.assessment = text(body.assessment);
+  n.plan = text(body.plan);
+  n.teeth = Array.isArray(body.teeth) ? [...new Set(body.teeth.map(Number).filter(isValidTooth))].sort() : [];
+  n.updatedAt = new Date().toISOString();
+}
+
+app.get("/api/patients/:patientId/notes", requireRole(...CLINICAL), (req: AuthedRequest, res) => {
+  const p = patientOf(req);
+  if (!p) return void res.status(404).json({ error: "ไม่พบคนไข้" });
+  const list = getDb()
+    .notes.filter((n) => n.patientId === p.id)
+    .sort((a, b) => b.visitDate.localeCompare(a.visitDate) || b.createdAt.localeCompare(a.createdAt));
+  res.json(list.map(noteView));
+});
+
+app.post("/api/patients/:patientId/notes", requireRole("owner", "dentist"), (req: AuthedRequest, res) => {
+  const p = patientOf(req);
+  if (!p) return void res.status(404).json({ error: "ไม่พบคนไข้" });
+  const now = new Date().toISOString();
+  const n: SoapNote = {
+    id: crypto.randomUUID(),
+    clinicId: p.clinicId,
+    patientId: p.id,
+    visitDate: todayTH(),
+    subjective: "",
+    objective: "",
+    assessment: "",
+    plan: "",
+    teeth: [],
+    authorId: req.user!.id,
+    createdAt: now,
+    updatedAt: now,
+  };
+  applyNoteBody(n, req.body ?? {});
+  getDb().notes.push(n);
+  save();
+  audit({ ...ctx(req), action: "CREATE_NOTE", patientId: p.id, target: n.id });
+  res.status(201).json(noteView(n));
+});
+
+app.put("/api/patients/:patientId/notes/:noteId", requireRole("owner", "dentist"), (req: AuthedRequest, res) => {
+  const p = patientOf(req);
+  if (!p) return void res.status(404).json({ error: "ไม่พบคนไข้" });
+  const n = noteOf(req, res, p);
+  if (!n) return;
+  applyNoteBody(n, req.body ?? {});
+  save();
+  audit({ ...ctx(req), action: "UPDATE_NOTE", patientId: p.id, target: n.id });
+  res.json(noteView(n));
+});
+
+app.post("/api/patients/:patientId/notes/:noteId/sign", requireRole("owner", "dentist"), (req: AuthedRequest, res) => {
+  const p = patientOf(req);
+  if (!p) return void res.status(404).json({ error: "ไม่พบคนไข้" });
+  const n = noteOf(req, res, p);
+  if (!n) return;
+  if (!n.assessment.trim() && !n.plan.trim()) return void res.status(400).json({ error: "ต้องมี Assessment หรือ Plan ก่อนลงนาม" });
+  n.signedAt = new Date().toISOString();
+  save();
+  audit({ ...ctx(req), action: "SIGN_NOTE", patientId: p.id, target: n.id });
+  res.json(noteView(n));
+});
 
 // ---------- images ----------
 app.get(

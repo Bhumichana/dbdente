@@ -55,10 +55,36 @@ export interface AuditEntry {
   at: string;
   userId: string;
   clinicId: string;
-  action: "LOGIN" | "VIEW_PATIENT" | "VIEW_IMAGE" | "UPLOAD_IMAGE" | "UPDATE_CHART" | "LINK_IMAGE";
+  action:
+    | "LOGIN"
+    | "VIEW_PATIENT"
+    | "VIEW_IMAGE"
+    | "UPLOAD_IMAGE"
+    | "UPDATE_CHART"
+    | "LINK_IMAGE"
+    | "CREATE_NOTE"
+    | "UPDATE_NOTE"
+    | "SIGN_NOTE";
   patientId?: string;
   target?: string;
   ip?: string;
+}
+
+/** บันทึกการรักษาแบบ SOAP — 1 รายการต่อ 1 visit ต่อทันตแพทย์ ลงนามแล้วแก้ไม่ได้ */
+export interface SoapNote {
+  id: string;
+  clinicId: string;
+  patientId: string;
+  visitDate: string; // YYYY-MM-DD
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+  teeth: number[];
+  authorId: string;
+  createdAt: string;
+  updatedAt: string;
+  signedAt?: string;
 }
 
 export interface Db {
@@ -67,6 +93,7 @@ export interface Db {
   patients: Patient[];
   charts: Record<string, Record<number, ToothRecord>>; // patientId -> tooth -> record
   imageLinks: Record<string, ImageLink>; // sopInstanceUid -> link
+  notes: SoapNote[];
 }
 
 export const dicomPatientId = (clinic: Clinic, p: Patient) => p.pacsPatientId || `${clinic.code}-${p.hn}`;
