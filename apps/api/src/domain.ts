@@ -25,6 +25,8 @@ export interface Patient {
   phone?: string;
   allergies: string[];
   medicalAlerts: string[];
+  /** PatientID ที่มีอยู่แล้วใน PACS (ใช้แทนรูปแบบ {clinic}-{HN} เช่น ตอนผูกกับข้อมูลเดิม) */
+  pacsPatientId?: string;
 }
 
 export type Surface = "M" | "O" | "D" | "B" | "L";
@@ -67,4 +69,4 @@ export interface Db {
   imageLinks: Record<string, ImageLink>; // sopInstanceUid -> link
 }
 
-export const dicomPatientId = (clinic: Clinic, p: Patient) => `${clinic.code}-${p.hn}`;
+export const dicomPatientId = (clinic: Clinic, p: Patient) => p.pacsPatientId || `${clinic.code}-${p.hn}`;

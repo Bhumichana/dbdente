@@ -185,8 +185,13 @@ const films: Film[] = [
 ];
 
 const images = createImageSource();
-console.log(`กำลังสร้างภาพ ${films.length} ไฟล์ → ${images.name}`);
-for (const f of films) {
+if (images.readOnly) {
+  console.log(`⚠ ${images.name} อยู่ในโหมดอ่านอย่างเดียว — ไม่ส่งภาพเดโมเข้า PACS (สร้างเฉพาะข้อมูลคลินิก/คนไข้)`);
+  console.log("  ผูกคนไข้เดโมกับ PatientID ที่มีใน PACS ด้วย: npm run pacs:check -- --patient <PatientID> --link p1");
+} else {
+  console.log(`กำลังสร้างภาพ ${films.length} ไฟล์ → ${images.name}`);
+}
+for (const f of images.readOnly ? [] : films) {
   const buf = toDicom(f);
   const meta = await images.store(buf);
   db.imageLinks[meta.sopInstanceUid] = { sopInstanceUid: meta.sopInstanceUid, patientId: f.patient.id, filmType: f.filmType, teeth: f.teeth };

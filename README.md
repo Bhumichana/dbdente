@@ -30,7 +30,29 @@ npm run dev       # API :4000 + Web :3000
 ไฟล์ DICOM ตัวอย่างสำหรับทดสอบปุ่มอัปโหลดอยู่ที่ `apps/api/data/samples/`
 ภาพทั้งหมดเป็นภาพสังเคราะห์และคนไข้เป็นข้อมูลสมมติ
 
+## dcm4chee ทดสอบในเครื่อง (Docker)
+
+```bash
+cd infra/dcm4chee-dev && docker compose up -d     # UI: http://localhost:8080/dcm4chee-arc/ui2
+```
+
+ไม่เปิด security และเปิดพอร์ตเฉพาะ localhost จึงใช้กับข้อมูลทดสอบเท่านั้น
+
+ใส่ภาพเดโมเข้าไปครั้งแรกด้วย `DCM4CHEE_READ_ONLY=false npm run seed` (รันใน `apps/api`)
+ลบทิ้งทั้งหมดด้วย `docker compose down -v`
+
 ## เชื่อมต่อ dcm4chee
+
+ตรวจการเชื่อมต่อแบบอ่านอย่างเดียว (ไม่พิมพ์ชื่อคนไข้):
+
+```bash
+cd apps/api
+npm run pacs:check                                        # auth + QIDO
+npm run pacs:check -- --patient <PatientID>               # + WADO/thumbnail พร้อมจับเวลา
+npm run pacs:check -- --patient <PatientID> --link p1     # ผูกคนไข้เดโม p1 กับ PatientID ที่มีใน PACS
+```
+
+`DCM4CHEE_READ_ONLY=true` เป็นค่าเริ่มต้น ระหว่างนี้ API จะไม่อัปโหลด, seed จะไม่ส่งภาพ และเว็บจะซ่อนปุ่มอัปโหลด
 
 แก้ไฟล์ `apps/api/.env`:
 

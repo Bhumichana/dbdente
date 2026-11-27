@@ -15,6 +15,8 @@ export const config = {
   dcm4chee: {
     rsUrl,
     wadoUrl: (process.env.DCM4CHEE_WADO_URL || rsUrl.replace(/\/rs$/, "/wado")).replace(/\/+$/, ""),
+    // ค่าเริ่มต้น = อ่านอย่างเดียว ต้องตั้ง DCM4CHEE_READ_ONLY=false เองถึงจะเขียน (STOW) ลง PACS ได้
+    readOnly: process.env.DCM4CHEE_READ_ONLY !== "false",
     token: process.env.DCM4CHEE_TOKEN || "",
     kc: {
       tokenUrl: process.env.DCM4CHEE_KC_TOKEN_URL || "",

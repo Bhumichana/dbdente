@@ -12,4 +12,4 @@ export function createImageSource(): ImageSource {
   return new LocalSource(path.join(config.dataDir, "dicom"));
 }
 
-export type { ImageSource, InstanceMeta } from "./types.js";
+export { ReadOnlyError, type ImageSource, type InstanceMeta } from "./types.js";

@@ -11,7 +11,7 @@ import {
   type ToothRecord,
   type ToothStatus,
 } from "./domain.js";
-import { createImageSource } from "./imaging/index.js";
+import { createImageSource, ReadOnlyError } from "./imaging/index.js";
 import { assignPatient, parseMeta } from "./imaging/dicom.js";
 import { ByteLru } from "./imaging/lru.js";
 import { audit, getDb, readAudit, save } from "./store.js";
@@ -64,7 +64,7 @@ function guessFilmType(m: { modality: string; rows: number; columns: number; ser
 }
 
 // ---------- auth ----------
-app.get("/api/health", (_req, res) => res.json({ ok: true, imageSource: images.name }));
+app.get("/api/health", (_req, res) => res.json({ ok: true, imageSource: images.name, readOnly: images.readOnly }));
 
 // เดโม: เลือกผู้ใช้จากรายการแทนการกรอกรหัสผ่าน (ระยะ 1 จะใช้ระบบ login จริง)
 app.get("/api/auth/demo-users", (_req, res) => {
@@ -229,6 +229,7 @@ app.post(
   h(async (req, res) => {
     const p = patientOf(req);
     if (!p) return res.status(404).json({ error: "ไม่พบคนไข้" });
+    if (images.readOnly) return res.status(403).json({ error: new ReadOnlyError().message });
     if (!req.file) return res.status(400).json({ error: "ไม่พบไฟล์" });
     const clinic = getDb().clinics.find((c) => c.id === p.clinicId)!;
     let buf: Buffer;

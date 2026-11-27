@@ -1,0 +1,51 @@
+# dcm4chee-arc สำหรับพัฒนา/ทดสอบในเครื่อง (ไม่เปิด security — ห้ามใช้กับข้อมูลคนไข้จริง)
+#   docker compose up -d        → UI: http://localhost:8080/dcm4chee-arc/ui2
+#   docker compose down -v      → ลบทิ้งทั้งหมดรวมข้อมูล
+# DICOMweb: http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs
+name: dbdente-dcm4chee
+
+services:
+  ldap:
+    image: dcm4che/slapd-dcm4chee:2.6.15-36.0
+    environment:
+      STORAGE_DIR: /storage/fs1
+    volumes:
+      - ldap-data:/var/lib/openldap/openldap-data
+      - ldap-conf:/etc/openldap/slapd.d
+    restart: unless-stopped
+
+  db:
+    image: dcm4che/postgres-dcm4chee:17.11-36
+    environment:
+      POSTGRES_DB: pacsdb
+      POSTGRES_USER: pacs
+      POSTGRES_PASSWORD: pacs
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  arc:
+    image: dcm4che/dcm4chee-arc-psql:5.36.0
+    ports:
+      - "127.0.0.1:8080:8080" # HTTP / DICOMweb (เปิดเฉพาะ localhost)
+      - "127.0.0.1:11112:11112" # DICOM DIMSE (C-STORE/C-FIND)
+    environment:
+      POSTGRES_DB: pacsdb
+      POSTGRES_USER: pacs
+      POSTGRES_PASSWORD: pacs
+      WILDFLY_CHOWN: /storage
+      WILDFLY_WAIT_FOR: ldap:389 db:5432
+    depends_on:
+      - ldap
+      - db
+    volumes:
+      - wildfly:/opt/wildfly/standalone
+      - storage:/storage
+    restart: unless-stopped
+
+volumes:
+  ldap-data:
+  ldap-conf:
+  db-data:
+  wildfly:
+  storage:

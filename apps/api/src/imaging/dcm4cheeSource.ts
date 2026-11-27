@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { config } from "../config.js";
 import { parseMeta, renderThumbnail } from "./dicom.js";
-import type { ImageSource, InstanceMeta } from "./types.js";
+import { ReadOnlyError, type ImageSource, type InstanceMeta } from "./types.js";
 
 type DicomJson = Record<string, { vr: string; Value?: unknown[] }>;
 
@@ -17,10 +17,11 @@ const INCLUDE = ["00080020", "0008103E", "00080060", "00280010", "00280011", "00
  */
 export class Dcm4cheeSource implements ImageSource {
   readonly name = "dcm4chee";
+  readonly readOnly = config.dcm4chee.readOnly;
   private kcToken: { value: string; exp: number } | null = null;
   private metaCache = new Map<string, InstanceMeta>();
 
-  private async authHeaders(): Promise<Record<string, string>> {
+  async authHeaders(): Promise<Record<string, string>> {
     const { token, kc } = config.dcm4chee;
     if (token) return { Authorization: `Bearer ${token}` };
     if (!kc.tokenUrl) return {};
@@ -105,6 +106,7 @@ export class Dcm4cheeSource implements ImageSource {
   }
 
   async store(buf: Buffer) {
+    if (this.readOnly) throw new ReadOnlyError();
     const meta = parseMeta(buf);
     const boundary = `dbdente-${crypto.randomUUID()}`;
     const body = Buffer.concat([

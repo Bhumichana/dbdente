@@ -6,6 +6,7 @@ import type { ImageSource, InstanceMeta } from "./types.js";
 /** เก็บไฟล์ DICOM ในโฟลเดอร์ — สำหรับเดโม/พัฒนาโดยไม่ต้องต่อ PACS */
 export class LocalSource implements ImageSource {
   readonly name = "local";
+  readonly readOnly = false;
   private index = new Map<string, InstanceMeta>();
 
   constructor(private dir: string) {
