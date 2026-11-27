@@ -43,29 +43,29 @@ export default function DemoLogin() {
     <main className="flex flex-1 items-center justify-center p-6">
       <div className="w-full max-w-xl">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-xl font-bold text-white">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-700 text-xl font-bold text-white">
             D
           </div>
           <h1 className="text-2xl font-semibold">DBDente</h1>
-          <p className="text-slate-500">ระบบคลินิกทันตกรรม + Web DICOM Viewer — เดโมระยะ 0</p>
+          <p className="text-ink-500">ระบบคลินิกทันตกรรม + Web DICOM Viewer — เดโมระยะ 0</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-          <p className="px-4 pt-3 pb-2 text-sm text-slate-500">เลือกผู้ใช้เพื่อเข้าสู่ระบบ (ทดลองสิทธิ์ตามบทบาท)</p>
+        <div className="rounded-2xl border border-ink-200 bg-white p-2 shadow-sm">
+          <p className="px-4 pt-3 pb-2 text-sm text-ink-500">เลือกผู้ใช้เพื่อเข้าสู่ระบบ (ทดลองสิทธิ์ตามบทบาท)</p>
           {error && <p className="m-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-          {!users && !error && <p className="p-4 text-slate-400">กำลังโหลด…</p>}
+          {!users && !error && <p className="p-4 text-ink-400">กำลังโหลด…</p>}
           <ul>
             {users?.map((u) => (
               <li key={u.id}>
                 <button
                   onClick={() => login(u)}
-                  className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left hover:bg-brand-50 active:bg-brand-100"
+                  className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left hover:bg-navy-50 active:bg-navy-100"
                 >
                   <span>
                     <span className="block font-medium">{u.name}</span>
-                    <span className="block text-sm text-slate-500">{ROLE_HINT[u.role]}</span>
+                    <span className="block text-sm text-ink-500">{ROLE_HINT[u.role]}</span>
                   </span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
+                  <span className="rounded-full bg-ink-100 px-3 py-1 text-xs text-ink-600">
                     {ROLE_LABEL[u.role]}
                   </span>
                 </button>
@@ -73,7 +73,7 @@ export default function DemoLogin() {
             ))}
           </ul>
         </div>
-        {users?.[0]?.clinicName && <p className="mt-4 text-center text-sm text-slate-400">{users[0].clinicName}</p>}
+        {users?.[0]?.clinicName && <p className="mt-4 text-center text-sm text-ink-400">{users[0].clinicName}</p>}
       </div>
     </main>
   );

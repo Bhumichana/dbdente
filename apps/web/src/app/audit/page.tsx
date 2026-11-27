@@ -36,13 +36,13 @@ function AuditList() {
       <AppHeader />
       <main className="mx-auto w-full max-w-5xl p-4 sm:p-6">
         <h1 className="mb-1 text-xl font-semibold">Audit Log</h1>
-        <p className="mb-4 text-sm text-slate-500">
+        <p className="mb-4 text-sm text-ink-500">
           บันทึกทุกครั้งที่มีการเปิดดู อัปโหลด หรือแก้ไขข้อมูลคนไข้และฟิล์ม (ตามข้อกำหนด PDPA ใน PRD)
         </p>
         {error && <p className="rounded-lg bg-red-50 p-3 text-red-700">{error}</p>}
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-xl border border-ink-200 bg-white">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-slate-500">
+            <thead className="bg-ink-50 text-left text-ink-500">
               <tr>
                 <th className="px-4 py-2 font-medium">เวลา</th>
                 <th className="px-4 py-2 font-medium">ผู้ใช้</th>
@@ -51,7 +51,7 @@ function AuditList() {
                 <th className="px-4 py-2 font-medium">รายการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-ink-100">
               {list?.map((e, i) => (
                 <tr key={i}>
                   <td className="px-4 py-2 whitespace-nowrap tabular-nums">
@@ -60,7 +60,7 @@ function AuditList() {
                   <td className="px-4 py-2">{e.userName}</td>
                   <td className="px-4 py-2">{ACTION_LABEL[e.action] ?? e.action}</td>
                   <td className="px-4 py-2">{e.patientName ?? "–"}</td>
-                  <td className="max-w-xs truncate px-4 py-2 font-mono text-xs text-slate-500" title={e.target}>
+                  <td className="max-w-xs truncate px-4 py-2 font-mono text-xs text-ink-500" title={e.target}>
                     {e.target ?? ""}
                   </td>
                 </tr>

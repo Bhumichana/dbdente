@@ -44,19 +44,19 @@ function PatientList() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="ค้นหาชื่อ หรือ HN"
-            className="ml-auto w-64 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500"
+            className="ml-auto w-64 rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm outline-none focus:border-navy-500"
           />
         </div>
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-          {list?.length === 0 && <p className="p-6 text-center text-slate-400">ไม่พบคนไข้</p>}
-          <ul className="divide-y divide-slate-100">
+        <div className="overflow-hidden rounded-xl border border-ink-200 bg-white">
+          {list?.length === 0 && <p className="p-6 text-center text-ink-400">ไม่พบคนไข้</p>}
+          <ul className="divide-y divide-ink-100">
             {list?.map((p) => (
               <li key={p.id}>
-                <Link href={`/patients/${p.id}`} className="flex items-center gap-4 px-4 py-3 hover:bg-slate-50">
-                  <span className="w-24 font-mono text-sm text-slate-500">{p.hn}</span>
+                <Link href={`/patients/${p.id}`} className="flex items-center gap-4 px-4 py-3 hover:bg-ink-50">
+                  <span className="w-24 font-mono text-sm text-ink-500">{p.hn}</span>
                   <span className="flex-1">
                     <span className="font-medium">{p.fullName}</span>
-                    <span className="ml-2 text-sm text-slate-500">
+                    <span className="ml-2 text-sm text-ink-500">
                       {p.sex === "M" ? "ชาย" : "หญิง"} · {age(p.birthDate)} ปี
                     </span>
                   </span>

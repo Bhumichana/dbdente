@@ -1,12 +1,53 @@
 @import "tailwindcss";
 
+/*
+ * DBDente design tokens — โทน navy + ขาว (ดูแผน UI)
+ *  navy-*   สีแบรนด์: โครง เมนู ปุ่มหลัก (primary = navy-700)
+ *  ink-*    neutral อมน้ำเงิน แทน slate: พื้น เส้น ตัวอักษร
+ *  viewer-* พื้นที่อ่านฟิล์ม (มืดเสมอ)
+ *  danger/success/warning  สีความหมาย แยกจากแบรนด์ — แดงสงวนให้แพ้ยา/แผนการรักษา
+ * สถานะผังฟันอยู่ที่ src/lib/fdi.ts (STATUS_STYLE)
+ */
 @theme inline {
-  --font-sans: var(--font-thai), ui-sans-serif, system-ui, sans-serif;
-  --color-brand-50: #eef7f7;
-  --color-brand-100: #d5eded;
-  --color-brand-500: #14868a;
-  --color-brand-600: #0f6f73;
-  --color-brand-700: #0c585b;
+  --font-sans: var(--font-thai), "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-num), ui-monospace, "Cascadia Mono", monospace;
+
+  --color-navy-50: #f2f5fa;
+  --color-navy-100: #e3eaf5;
+  --color-navy-200: #c3d1e8;
+  --color-navy-300: #9db4dc;
+  --color-navy-400: #6d90cf;
+  --color-navy-500: #3d6bc0;
+  --color-navy-600: #2a55a0;
+  --color-navy-700: #1e4280;
+  --color-navy-800: #163463;
+  --color-navy-900: #10264a;
+  --color-navy-950: #0b1b33;
+
+  --color-ink-50: #f5f7fb;
+  --color-ink-100: #eef1f6;
+  --color-ink-200: #dce3ee;
+  --color-ink-300: #c3cddc;
+  --color-ink-400: #8c9ab0;
+  --color-ink-500: #5a6b85;
+  --color-ink-600: #44546d;
+  --color-ink-700: #2c3a52;
+  --color-ink-800: #1b2740;
+  --color-ink-900: #0f1e36;
+  --color-ink-950: #0a1426;
+
+  --color-viewer: #0e1424;
+  --color-viewer-panel: #141c30;
+  --color-viewer-raised: #1f2a44;
+  --color-viewer-hover: #2c3856;
+  --color-viewer-line: #222d46;
+
+  --color-danger: #c62828;
+  --color-danger-soft: #fdecec;
+  --color-success: #1f8a5b;
+  --color-success-soft: #e6f4ed;
+  --color-warning: #a86a12;
+  --color-warning-soft: #fdf3e1;
 }
 
 :root {
@@ -14,10 +55,21 @@
 }
 
 body {
-  background: #f4f6f8;
-  color: #0f172a;
+  background: var(--color-ink-50);
+  color: var(--color-ink-900);
   font-family: var(--font-sans);
+  line-height: 1.6; /* สระบน-ล่างภาษาไทยไม่ชนกัน */
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ตัวเลข (HN, เลขซี่, เงิน, mm) เรียงหลักตรงกัน */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-navy-500);
+  outline-offset: 2px;
 }
 
 /* viewer: ปิด gesture ของเบราว์เซอร์ เพื่อให้ Cornerstone รับ touch เอง */

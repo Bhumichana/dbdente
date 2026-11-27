@@ -25,5 +25,5 @@ export const SURFACE_LABEL = {
 export const STATUS_STYLE = {
   existing: { fill: "#64748b", label: "ฟันเดิม (Existing)" },
   planned: { fill: "#dc2626", label: "แผนการรักษา (Planned)" },
-  completed: { fill: "#2563eb", label: "ทำเสร็จแล้ว (Completed)" },
+  completed: { fill: "#1d6fe0", label: "ทำเสร็จแล้ว (Completed)" },
 } as const;

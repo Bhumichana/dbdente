@@ -30,7 +30,7 @@ export function ToothChart({ records, filmCount, selected, onSelect, dentition, 
         const label = (
           <span
             className={`rounded px-1 py-px text-[11px] tabular-nums leading-none ${
-              films > 0 ? "bg-teal-600 font-semibold text-white" : isSel ? "font-bold text-brand-700" : "text-slate-500"
+              films > 0 ? "bg-navy-600 font-semibold text-white" : isSel ? "font-bold text-navy-700" : "text-ink-500"
             }`}
           >
             {t}
@@ -41,8 +41,8 @@ export function ToothChart({ records, filmCount, selected, onSelect, dentition, 
             key={t}
             onClick={() => onSelect(isSel ? null : t)}
             className={`relative flex flex-col items-center gap-1 rounded-md px-[2px] py-1 transition ${
-              isSel ? "bg-brand-100 ring-2 ring-brand-500" : "hover:bg-slate-100"
-            } ${midline ? "before:absolute before:top-1 before:bottom-1 before:-left-[2px] before:w-px before:bg-slate-400" : ""}`}
+              isSel ? "bg-navy-100 ring-2 ring-navy-500" : "hover:bg-ink-100"
+            } ${midline ? "before:absolute before:top-1 before:bottom-1 before:-left-[2px] before:w-px before:bg-ink-400" : ""}`}
             data-tooth={t}
             title={[`ซี่ ${t}`, rec?.procedure, films ? `ฟิล์ม ${films} ภาพ` : ""].filter(Boolean).join(" · ")}
           >
@@ -66,7 +66,7 @@ export function ToothChart({ records, filmCount, selected, onSelect, dentition, 
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <h2 className="font-semibold">ผังฟัน (FDI)</h2>
-        <div className="ml-auto flex rounded-lg bg-slate-100 p-0.5 text-xs">
+        <div className="ml-auto flex rounded-lg bg-ink-100 p-0.5 text-xs">
           {(
             [
               ["permanent", "ฟันแท้"],
@@ -77,7 +77,7 @@ export function ToothChart({ records, filmCount, selected, onSelect, dentition, 
             <button
               key={k}
               onClick={() => onDentition(k)}
-              className={`rounded-md px-2.5 py-1 ${dentition === k ? "bg-white font-medium shadow-sm" : "text-slate-500"}`}
+              className={`rounded-md px-2.5 py-1 ${dentition === k ? "bg-white font-medium shadow-sm" : "text-ink-500"}`}
             >
               {l}
             </button>
@@ -85,14 +85,14 @@ export function ToothChart({ records, filmCount, selected, onSelect, dentition, 
         </div>
       </div>
 
-      <div className="space-y-1 rounded-xl border border-slate-200 bg-white p-2">
+      <div className="space-y-1 rounded-xl border border-ink-200 bg-white p-2">
         {showPermanent && row(PERMANENT.upper, true, 16)}
         {showPrimary && (
           <div className={showPermanent ? "px-[15.6%]" : ""}>{row(PRIMARY.upper, true, 10)}</div>
         )}
-        <div className="flex items-center gap-2 py-0.5 text-[10px] text-slate-400">
+        <div className="flex items-center gap-2 py-0.5 text-[10px] text-ink-400">
           <span>ขวาคนไข้</span>
-          <span className="h-px flex-1 bg-slate-200" />
+          <span className="h-px flex-1 bg-ink-200" />
           <span>ซ้ายคนไข้</span>
         </div>
         {showPrimary && (
@@ -101,7 +101,7 @@ export function ToothChart({ records, filmCount, selected, onSelect, dentition, 
         {showPermanent && row(PERMANENT.lower, false, 16)}
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-600">
         {Object.entries(STATUS_STYLE).map(([k, v]) => (
           <span key={k} className="flex items-center gap-1.5">
             <span className="h-3 w-3 rounded-sm" style={{ background: v.fill }} />
@@ -109,7 +109,7 @@ export function ToothChart({ records, filmCount, selected, onSelect, dentition, 
           </span>
         ))}
         <span className="flex items-center gap-1.5">
-          <span className="rounded bg-teal-600 px-1 text-[10px] font-semibold text-white">36</span>
+          <span className="rounded bg-navy-600 px-1 text-[10px] font-semibold text-white">36</span>
           มีฟิล์ม X-ray
         </span>
       </div>

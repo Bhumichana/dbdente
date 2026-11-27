@@ -60,7 +60,7 @@ export function ToothGlyph({
             <polygon
               points={points(s)}
               fill={st ? STATUS_STYLE[st].fill : "#ffffff"}
-              stroke="#94a3b8"
+              stroke="#9aa7bb"
               strokeWidth={1}
               opacity={missing ? 0.35 : 1}
               onClick={
@@ -80,7 +80,7 @@ export function ToothGlyph({
                 textAnchor="middle"
                 fontSize={s * 0.11}
                 fontWeight={600}
-                fill={st ? "#fff" : "#475569"}
+                fill={st ? "#fff" : "#44546d"}
                 pointerEvents="none"
               >
                 {surface}
@@ -90,7 +90,7 @@ export function ToothGlyph({
         );
       })}
       {missing && (
-        <g stroke="#0f172a" strokeWidth={2.5} strokeLinecap="round" pointerEvents="none">
+        <g stroke="#0f1e36" strokeWidth={2.5} strokeLinecap="round" pointerEvents="none">
           <line x1={3} y1={3} x2={s - 3} y2={s - 3} />
           <line x1={s - 3} y1={3} x2={3} y2={s - 3} />
         </g>

@@ -186,8 +186,8 @@ export default function DicomViewer({ patientId, images }: { patientId: string; 
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-slate-950 text-slate-100">
-      <div className="flex flex-wrap items-center gap-1 border-b border-slate-800 p-1.5">
+    <div className="flex h-full min-h-0 flex-col bg-viewer text-ink-100">
+      <div className="flex flex-wrap items-center gap-1 border-b border-viewer-line p-1.5">
         {TOOLBAR.map((t) => (
           <button
             key={t.tool}
@@ -195,14 +195,14 @@ export default function DicomViewer({ patientId, images }: { patientId: string; 
             title={t.label}
             aria-pressed={primary === t.tool}
             className={`flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm ${
-              primary === t.tool ? "bg-brand-500 text-white" : "hover:bg-slate-800"
+              primary === t.tool ? "bg-navy-600 text-white" : "hover:bg-viewer-raised"
             }`}
           >
             <span className="text-base leading-none">{t.icon}</span>
             <span className="hidden 2xl:inline">{t.label}</span>
           </button>
         ))}
-        <span className="mx-1 h-6 w-px bg-slate-700" />
+        <span className="mx-1 h-6 w-px bg-viewer-hover" />
         {ACTIONS.map((a) => {
           const pressed = a.key === "sharpen" && sharpen[active];
           return (
@@ -212,7 +212,7 @@ export default function DicomViewer({ patientId, images }: { patientId: string; 
             title={a.label}
             aria-pressed={pressed}
             className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-base ${
-              pressed ? "bg-slate-700" : "hover:bg-slate-800"
+              pressed ? "bg-viewer-hover" : "hover:bg-viewer-raised"
             }`}
           >
             {a.icon}
@@ -227,7 +227,7 @@ export default function DicomViewer({ patientId, images }: { patientId: string; 
             key={img.sopInstanceUid + i}
             onPointerDown={() => setActive(i)}
             className={`relative min-h-0 overflow-hidden rounded ${
-              images.length > 1 && active === i ? "ring-2 ring-brand-500" : "ring-1 ring-slate-800"
+              images.length > 1 && active === i ? "ring-2 ring-navy-500" : "ring-1 ring-viewer-line"
             }`}
           >
             <div
@@ -237,14 +237,14 @@ export default function DicomViewer({ patientId, images }: { patientId: string; 
               onContextMenu={(e) => e.preventDefault()}
               className="cs-viewport absolute inset-0"
             />
-            <div className="pointer-events-none absolute top-2 left-2 text-xs leading-relaxed text-slate-200 drop-shadow">
+            <div className="pointer-events-none absolute top-2 left-2 text-xs leading-relaxed text-ink-200 drop-shadow">
               <div className="font-semibold">
                 {FILM_LABEL[img.filmType]} {img.teeth.length > 0 && `· ซี่ ${img.teeth.join(", ")}`}
               </div>
               <div>{fmtDate(img.studyDate)}</div>
-              <div className="text-slate-400">{img.seriesDescription}</div>
+              <div className="text-ink-400">{img.seriesDescription}</div>
             </div>
-            <div className="pointer-events-none absolute right-2 bottom-2 text-right text-[11px] text-slate-300 tabular-nums drop-shadow">
+            <div className="pointer-events-none absolute right-2 bottom-2 text-right text-[11px] text-ink-300 tabular-nums drop-shadow">
               {info[i]?.ww !== undefined && (
                 <div>
                   WW {info[i].ww} / WL {info[i].wl}

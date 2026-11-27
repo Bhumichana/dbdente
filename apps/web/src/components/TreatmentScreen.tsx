@@ -14,7 +14,7 @@ import type { Patient, ToothRecord, XrayImage } from "@/lib/types";
 // Cornerstone ใช้ WebGL/Web Worker — โหลดเฉพาะฝั่ง browser
 const DicomViewer = dynamic(() => import("@/components/viewer/DicomViewer"), {
   ssr: false,
-  loading: () => <div className="flex h-full items-center justify-center bg-slate-950 text-slate-500">กำลังเตรียม Viewer…</div>,
+  loading: () => <div className="flex h-full items-center justify-center bg-viewer text-ink-500">กำลังเตรียม Viewer…</div>,
 });
 
 function age(birth: string) {
@@ -36,6 +36,7 @@ export function TreatmentScreen() {
   const [openSops, setOpenSops] = useState<string[]>([]);
   const [dentition, setDentition] = useState<Dentition>("permanent");
   const [error, setError] = useState<string | null>(null);
+  const [pacsReadOnly, setPacsReadOnly] = useState(false);
 
   const loadImages = useCallback(
     () => api<XrayImage[]>(`/api/patients/${id}/images`).then(setImages),
@@ -50,6 +51,7 @@ export function TreatmentScreen() {
         setDentition(childAge < 6 ? "primary" : childAge < 13 ? "mixed" : "permanent");
       })
       .catch((e: ApiError) => setError(e.message));
+    api<{ readOnly: boolean }>("/api/health").then((h) => setPacsReadOnly(h.readOnly));
     if (!clinical) return;
     api<ToothRecord[]>(`/api/patients/${id}/chart`).then((list) =>
       setChart(Object.fromEntries(list.map((r) => [r.tooth, r]))),
@@ -105,16 +107,16 @@ export function TreatmentScreen() {
     <div className="flex h-dvh flex-col">
       <AppHeader>
         <div className="flex items-center gap-3 truncate">
-          <span className="font-mono text-sm text-slate-500">{patient.hn}</span>
-          <span className="truncate font-semibold">{patient.fullName}</span>
-          <span className="text-sm text-slate-500">
+          <span className="font-mono text-sm text-navy-200">{patient.hn}</span>
+          <span className="truncate font-semibold text-white">{patient.fullName}</span>
+          <span className="text-sm text-navy-200">
             {patient.sex === "M" ? "ชาย" : "หญิง"} · {age(patient.birthDate)} ปี
           </span>
         </div>
       </AppHeader>
 
       {hasAlert && (
-        <div role="alert" className="flex flex-wrap items-center gap-x-6 gap-y-1 bg-red-600 px-4 py-2 text-sm text-white">
+        <div role="alert" className="flex flex-wrap items-center gap-x-6 gap-y-1 bg-danger px-4 py-2 text-sm text-white">
           {patient.allergies.length > 0 && (
             <span>
               <b>⚠ แพ้ยา:</b> {patient.allergies.join(", ")}
@@ -129,12 +131,12 @@ export function TreatmentScreen() {
       )}
 
       {!clinical ? (
-        <div className="m-6 rounded-xl border border-slate-200 bg-white p-6 text-slate-600">
+        <div className="m-6 rounded-xl border border-ink-200 bg-white p-6 text-ink-600">
           บทบาทเคาน์เตอร์/การเงิน ไม่มีสิทธิ์ดูบันทึกการรักษาและฟิล์ม X-ray (ตาม RBAC ใน PRD)
         </div>
       ) : (
         <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(420px,5fr)_7fr]">
-          <section className="min-h-0 space-y-3 overflow-y-auto border-r border-slate-200 p-3">
+          <section className="min-h-0 space-y-3 overflow-y-auto border-r border-ink-200 p-3">
             <ToothChart
               records={chart}
               filmCount={filmCount}
@@ -148,7 +150,7 @@ export function TreatmentScreen() {
                 key={`${selected}-${chart[selected]?.updatedAt ?? ""}`}
                 tooth={selected} record={chart[selected]} canEdit={canEditChart} onSave={saveTooth} />
             ) : (
-              <p className="rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500">
+              <p className="rounded-xl border border-dashed border-ink-300 p-4 text-center text-sm text-ink-500">
                 แตะซี่ฟันเพื่อดูฟิล์ม X-ray ของซี่นั้น และบันทึกการรักษา
               </p>
             )}
@@ -160,7 +162,7 @@ export function TreatmentScreen() {
               images={images}
               selectedTooth={selected}
               openSops={openSops}
-              canUpload={clinical}
+              canUpload={clinical && !pacsReadOnly}
               canLink={clinical}
               onOpen={setOpenSops}
               onChanged={loadImages}
@@ -169,7 +171,7 @@ export function TreatmentScreen() {
               {openImages.length > 0 ? (
                 <DicomViewer patientId={id} images={openImages} />
               ) : (
-                <div className="flex h-full items-center justify-center bg-slate-950 p-6 text-center text-slate-500">
+                <div className="flex h-full items-center justify-center bg-viewer p-6 text-center text-ink-500">
                   เลือกฟิล์มจากแถบด้านบน หรือแตะซี่ฟันที่มีตัวเลขสีเขียว
                 </div>
               )}
