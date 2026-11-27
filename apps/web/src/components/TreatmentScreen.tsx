@@ -1,12 +1,17 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
 import { ToothChart, type Dentition } from "@/components/chart/ToothChart";
 import { ToothEditor } from "@/components/chart/ToothEditor";
+import { TopbarSlot } from "@/components/shell/AppShell";
+import { Badge } from "@/components/ui/badge";
+import { Alert, EmptyState } from "@/components/ui/feedback";
+import { toast } from "@/components/ui/toast";
 import { XrayGallery } from "@/components/xray/XrayGallery";
+import { age } from "@/lib/age";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { Patient, ToothRecord, XrayImage } from "@/lib/types";
@@ -16,12 +21,6 @@ const DicomViewer = dynamic(() => import("@/components/viewer/DicomViewer"), {
   ssr: false,
   loading: () => <div className="flex h-full items-center justify-center bg-viewer text-ink-500">กำลังเตรียม Viewer…</div>,
 });
-
-function age(birth: string) {
-  const b = new Date(birth);
-  const n = new Date();
-  return n.getFullYear() - b.getFullYear() - (n < new Date(n.getFullYear(), b.getMonth(), b.getDate()) ? 1 : 0);
-}
 
 export function TreatmentScreen() {
   const { id } = useParams<{ id: string }>();
@@ -89,31 +88,31 @@ export function TreatmentScreen() {
       else delete next[r.tooth];
       return next;
     });
+    toast(saved ? `บันทึกซี่ ${r.tooth} แล้ว` : `ล้างข้อมูลซี่ ${r.tooth} แล้ว`);
   }
 
-  if (error) {
-    return (
-      <>
-        <AppHeader />
-        <p className="m-6 rounded-lg bg-red-50 p-4 text-red-700">{error}</p>
-      </>
-    );
-  }
-  if (!patient) return <AppHeader />;
+  if (error) return <Alert className="m-4 sm:m-6">{error}</Alert>;
+  if (!patient) return null;
 
   const hasAlert = patient.allergies.length > 0 || patient.medicalAlerts.length > 0;
 
   return (
-    <div className="flex h-dvh flex-col">
-      <AppHeader>
-        <div className="flex items-center gap-3 truncate">
-          <span className="font-mono text-sm text-navy-200">{patient.hn}</span>
-          <span className="truncate font-semibold text-white">{patient.fullName}</span>
-          <span className="text-sm text-navy-200">
+    <div className="flex h-full flex-col">
+      <TopbarSlot>
+        <span aria-hidden className="hidden h-5 w-px bg-ink-200 lg:block" />
+        <span className="flex min-w-0 items-center gap-3">
+          <span className="hidden font-mono text-sm text-ink-500 sm:inline">{patient.hn}</span>
+          <span className="truncate font-semibold text-ink-900">{patient.fullName}</span>
+          <span className="hidden text-sm whitespace-nowrap text-ink-500 sm:inline">
             {patient.sex === "M" ? "ชาย" : "หญิง"} · {age(patient.birthDate)} ปี
           </span>
-        </div>
-      </AppHeader>
+          {patient.allergies.length > 0 && (
+            <Badge tone="danger-solid" className="hidden md:inline-flex">
+              แพ้ยา
+            </Badge>
+          )}
+        </span>
+      </TopbarSlot>
 
       {hasAlert && (
         <div role="alert" className="flex flex-wrap items-center gap-x-6 gap-y-1 bg-danger px-4 py-2 text-sm text-white">
@@ -131,8 +130,10 @@ export function TreatmentScreen() {
       )}
 
       {!clinical ? (
-        <div className="m-6 rounded-xl border border-ink-200 bg-white p-6 text-ink-600">
-          บทบาทเคาน์เตอร์/การเงิน ไม่มีสิทธิ์ดูบันทึกการรักษาและฟิล์ม X-ray (ตาม RBAC ใน PRD)
+        <div className="p-4 sm:p-6">
+          <EmptyState icon={<Lock />} title="ไม่แสดงบันทึกการรักษาและฟิล์ม X-ray">
+            บทบาทเคาน์เตอร์/การเงิน เห็นเฉพาะข้อมูลทั่วไปและการแจ้งเตือนของคนไข้ (ตาม RBAC ใน PRD)
+          </EmptyState>
         </div>
       ) : (
         <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(420px,5fr)_7fr]">
@@ -172,7 +173,7 @@ export function TreatmentScreen() {
                 <DicomViewer patientId={id} images={openImages} />
               ) : (
                 <div className="flex h-full items-center justify-center bg-viewer p-6 text-center text-ink-500">
-                  เลือกฟิล์มจากแถบด้านบน หรือแตะซี่ฟันที่มีตัวเลขสีเขียว
+                  เลือกฟิล์มจากแถบด้านบน หรือแตะซี่ฟันที่มีป้ายเลขสีน้ำเงิน
                 </div>
               )}
             </div>

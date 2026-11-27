@@ -72,6 +72,23 @@ body {
   outline-offset: 2px;
 }
 
+/* การเคลื่อนไหวของ dialog/toast — ปิดเมื่อผู้ใช้ตั้งลดการเคลื่อนไหว */
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes pop-in {
+  from { opacity: 0; scale: 0.97; }
+}
+@keyframes slide-in {
+  from { translate: -100% 0; }
+}
+.anim-fade { animation: fade-in 150ms ease-out; }
+.anim-pop { animation: pop-in 160ms ease-out; }
+.anim-slide { animation: slide-in 180ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade, .anim-pop, .anim-slide { animation: none; }
+}
+
 /* viewer: ปิด gesture ของเบราว์เซอร์ เพื่อให้ Cornerstone รับ touch เอง */
 .cs-viewport {
   touch-action: none;

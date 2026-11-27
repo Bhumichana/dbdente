@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { STATUS_STYLE, SURFACE_LABEL } from "@/lib/fdi";
 import type { Surface, ToothRecord, ToothStatus } from "@/lib/types";
 import { ToothGlyph } from "./ToothGlyph";
@@ -121,17 +122,13 @@ export function ToothEditor({
       {canEdit && (
         <div className="mt-2 flex justify-end gap-2">
           {dirty && (
-            <button onClick={() => setDraft(record ?? { tooth, surfaces: {} })} className="rounded-lg px-3 py-1.5 text-sm text-ink-500">
+            <Button variant="ghost" onClick={() => setDraft(record ?? { tooth, surfaces: {} })}>
               ยกเลิก
-            </button>
+            </Button>
           )}
-          <button
-            disabled={!dirty || saving}
-            onClick={save}
-            className="rounded-lg bg-navy-700 px-4 py-1.5 text-sm font-medium text-white disabled:opacity-40"
-          >
+          <Button disabled={!dirty || saving} onClick={save}>
             {saving ? "กำลังบันทึก…" : "บันทึก"}
-          </button>
+          </Button>
         </div>
       )}
     </div>
