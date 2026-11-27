@@ -4,15 +4,17 @@ import { Search, UserPlus, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonClass } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState, Skeleton } from "@/components/ui/feedback";
 import { Input } from "@/components/ui/input";
 import { age } from "@/lib/age";
 import { api } from "@/lib/api";
+import { useRole } from "@/lib/session";
 import type { Patient } from "@/lib/types";
 
 export default function PatientsPage() {
+  const role = useRole();
   const [q, setQ] = useState("");
   const [list, setList] = useState<Patient[] | null>(null);
 
@@ -30,12 +32,14 @@ export default function PatientsPage() {
         {list && <span className="font-mono text-sm text-ink-500">{list.length} ราย</span>}
         <div className="relative ml-auto w-full sm:w-72">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-400" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ค้นหาชื่อ หรือ HN" aria-label="ค้นหาคนไข้" className="pl-9" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ค้นหาชื่อ, HN หรือเบอร์โทร" aria-label="ค้นหาคนไข้" className="pl-9" />
         </div>
-        <Button disabled title="ลงทะเบียนคนไข้ใหม่ — Phase 1">
-          <UserPlus />
-          ลงทะเบียนใหม่
-        </Button>
+        {(role === "owner" || role === "receptionist") && (
+          <Link href="/patients/new" className={buttonClass()}>
+            <UserPlus />
+            ลงทะเบียนใหม่
+          </Link>
+        )}
       </div>
 
       {list?.length === 0 ? (

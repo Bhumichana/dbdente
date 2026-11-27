@@ -3,6 +3,7 @@ import cors from "cors";
 import express, { type NextFunction, type Response } from "express";
 import multer from "multer";
 import { requireAuth, requireRole, signToken, type AuthedRequest } from "./auth.js";
+import { registerClinicRoutes } from "./clinic.js";
 import { config } from "./config.js";
 import {
   dicomPatientId,
@@ -16,6 +17,7 @@ import {
 import { createImageSource, ReadOnlyError } from "./imaging/index.js";
 import { assignPatient, parseMeta } from "./imaging/dicom.js";
 import { ByteLru } from "./imaging/lru.js";
+import { attachRealtime } from "./realtime.js";
 import { audit, getDb, readAudit, save } from "./store.js";
 
 const images = createImageSource();
@@ -23,7 +25,8 @@ const fileCache = new ByteLru(256 * 1024 * 1024);
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 const app = express();
-app.use(cors({ origin: config.webOrigin.includes("*") ? true : config.webOrigin, exposedHeaders: ["Content-Length"] }));
+const corsOrigin = config.webOrigin.includes("*") ? true : config.webOrigin;
+app.use(cors({ origin: corsOrigin, exposedHeaders: ["Content-Length"] }));
 app.use(express.json());
 
 const CLINICAL = ["owner", "dentist", "assistant"] as const;
@@ -91,10 +94,15 @@ app.get("/api/me", (req: AuthedRequest, res) => {
 // ---------- patients ----------
 app.get("/api/patients", (req: AuthedRequest, res) => {
   const q = String(req.query.q ?? "").trim().toLowerCase();
+  const digits = q.replace(/\D/g, "");
   const list = getDb().patients.filter(
     (p) =>
       p.clinicId === req.user!.clinicId &&
-      (!q || p.fullName.toLowerCase().includes(q) || p.hn.toLowerCase().includes(q)),
+      (!q ||
+        p.fullName.toLowerCase().includes(q) ||
+        p.hn.toLowerCase().includes(q) ||
+        // ค้นด้วยเบอร์โทร / เลขบัตร (อย่างน้อย 4 หลัก ไม่สนขีด)
+        (digits.length >= 4 && [p.phone, p.citizenId].some((v) => v?.replace(/\D/g, "").includes(digits)))),
   );
   res.json(list);
 });
@@ -346,6 +354,9 @@ app.post(
   }),
 );
 
+// ---------- หน้าร้าน: ทะเบียน / นัดหมาย / คิว / เก้าอี้ ----------
+registerClinicRoutes(app);
+
 // ---------- audit ----------
 app.get("/api/audit", requireRole("owner"), (req: AuthedRequest, res) => {
   const { users, patients } = getDb();
@@ -363,6 +374,7 @@ app.use((err: Error, _req: AuthedRequest, res: Response, _next: NextFunction) =>
   res.status(502).json({ error: err.message });
 });
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   console.log(`DBDente API http://localhost:${config.port}  (image source: ${images.name})`);
 });
+attachRealtime(server, corsOrigin);

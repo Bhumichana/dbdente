@@ -25,6 +25,11 @@ export interface Patient {
   phone?: string;
   allergies: string[];
   medicalAlerts: string[];
+  /** เลขบัตรประชาชน 13 หลัก (จาก Smart Card / กรอกเอง) */
+  citizenId?: string;
+  address?: string;
+  emergencyContact?: { name: string; phone: string; relation?: string };
+  createdAt?: string;
   /** PatientID ที่มีอยู่แล้วใน PACS (ใช้แทนรูปแบบ {clinic}-{HN} เช่น ตอนผูกกับข้อมูลเดิม) */
   pacsPatientId?: string;
 }
@@ -64,7 +69,13 @@ export interface AuditEntry {
     | "LINK_IMAGE"
     | "CREATE_NOTE"
     | "UPDATE_NOTE"
-    | "SIGN_NOTE";
+    | "SIGN_NOTE"
+    | "CREATE_PATIENT"
+    | "UPDATE_PATIENT"
+    | "CREATE_APPOINTMENT"
+    | "UPDATE_APPOINTMENT"
+    | "QUEUE_STATUS"
+    | "CHAIR_STATUS";
   patientId?: string;
   target?: string;
   ip?: string;
@@ -87,6 +98,44 @@ export interface SoapNote {
   signedAt?: string;
 }
 
+/** เก้าอี้ทำฟัน (Dental Unit) */
+export type ChairStatus = "available" | "preparing" | "in_use" | "maintenance";
+export interface Chair {
+  id: string;
+  clinicId: string;
+  name: string;
+  status: ChairStatus;
+  updatedAt: string;
+}
+
+/**
+ * นัดหมาย = 1 visit · คิววันนี้คือนัดของวันนี้ที่มาถึงแล้ว (รวม walk-in)
+ * booked → arrived (ได้เลขคิว) → in_room → awaiting_payment → done
+ * booked → cancelled / no_show
+ */
+export type AppointmentStatus = "booked" | "arrived" | "in_room" | "awaiting_payment" | "done" | "cancelled" | "no_show";
+export interface Appointment {
+  id: string;
+  clinicId: string;
+  patientId: string;
+  dentistId: string;
+  chairId?: string;
+  /** เวลาท้องถิ่น (Asia/Bangkok) YYYY-MM-DDTHH:mm */
+  start: string;
+  durationMin: number;
+  procedure: string;
+  note?: string;
+  status: AppointmentStatus;
+  walkIn?: boolean;
+  queueNo?: string;
+  arrivedAt?: string;
+  calledAt?: string;
+  finishedAt?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Db {
   clinics: Clinic[];
   users: User[];
@@ -94,6 +143,8 @@ export interface Db {
   charts: Record<string, Record<number, ToothRecord>>; // patientId -> tooth -> record
   imageLinks: Record<string, ImageLink>; // sopInstanceUid -> link
   notes: SoapNote[];
+  chairs: Chair[];
+  appointments: Appointment[];
 }
 
 export const dicomPatientId = (clinic: Clinic, p: Patient) => p.pacsPatientId || `${clinic.code}-${p.hn}`;

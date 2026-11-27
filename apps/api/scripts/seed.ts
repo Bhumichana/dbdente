@@ -8,7 +8,17 @@ import fs from "node:fs";
 import path from "node:path";
 import dcmjs from "dcmjs";
 import { config } from "../src/config.js";
-import { dicomPatientId, type Clinic, type Db, type FilmType, type Patient, type ToothRecord } from "../src/domain.js";
+import {
+  dicomPatientId,
+  type Appointment,
+  type AppointmentStatus,
+  type Chair,
+  type Clinic,
+  type Db,
+  type FilmType,
+  type Patient,
+  type ToothRecord,
+} from "../src/domain.js";
 import { createImageSource } from "../src/imaging/index.js";
 import { replaceDb } from "../src/store.js";
 import { bitewingRight, pa11, pa36, panoramic } from "./synth.js";
@@ -61,6 +71,29 @@ const patients: Patient[] = [
   },
 ];
 
+// คนไข้เพิ่มเติมสำหรับคิว/นัดหมาย (ข้อมูลสมมติ)
+const extra: [string, string, string, "M" | "F", string[], string[]][] = [
+  ["p4", "วรรณา ศรีทอง", "1979-02-11", "F", [], []],
+  ["p5", "สมพร ดีใจ", "1965-07-30", "M", [], ["เบาหวาน"]],
+  ["p6", "ปกรณ์ ใจเย็น", "1988-12-05", "M", ["Sulfa"], []],
+  ["p7", "นภา ใจงาม", "2006-04-18", "F", [], []],
+  ["p8", "กมล ศรีสุข", "1995-09-23", "F", [], []],
+  ["p9", "ชัยวัฒน์ พูนผล", "1972-01-09", "M", [], ["ความดันโลหิตสูง"]],
+];
+extra.forEach(([id, fullName, birthDate, sex, allergies, medicalAlerts], i) =>
+  patients.push({
+    id,
+    clinicId: clinic.id,
+    hn: `HN${String(126 + i).padStart(6, "0")}`,
+    fullName,
+    birthDate,
+    sex,
+    phone: `081-000-${String(4 + i).padStart(4, "0")}`,
+    allergies,
+    medicalAlerts,
+  }),
+);
+
 const now = new Date().toISOString();
 const rec = (tooth: number, r: Omit<ToothRecord, "tooth" | "updatedAt" | "updatedBy">): ToothRecord => ({
   tooth,
@@ -76,6 +109,7 @@ const db: Db = {
     { id: "u2", clinicId: clinic.id, name: "ทพญ. ปริยา รักษ์ฟัน", role: "dentist" },
     { id: "u3", clinicId: clinic.id, name: "มาลี (เคาน์เตอร์)", role: "receptionist" },
     { id: "u4", clinicId: clinic.id, name: "สุดา (ผู้ช่วยทันตแพทย์)", role: "assistant" },
+    { id: "u5", clinicId: clinic.id, name: "ทพ. กิตติ ศักดิ์ดี (จัดฟัน)", role: "dentist" },
   ],
   patients,
   charts: {
@@ -99,7 +133,72 @@ const db: Db = {
   },
   imageLinks: {},
   notes: [],
+  chairs: [],
+  appointments: [],
 };
+
+// ---------- เก้าอี้ + นัดหมายของวันนี้/พรุ่งนี้ (สถานะเหมือนช่วงสายของวัน) ----------
+const chairStatus: Chair["status"][] = ["in_use", "preparing", "in_use", "available", "maintenance"];
+db.chairs = chairStatus.map((status, i) => ({ id: `ch${i + 1}`, clinicId: clinic.id, name: `Unit ${i + 1}`, status, updatedAt: now }));
+
+const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Bangkok" });
+const tomorrow = new Date(Date.now() + 864e5).toLocaleDateString("sv-SE", { timeZone: "Asia/Bangkok" });
+const at = (date: string, hm: string) => new Date(`${date}T${hm}:00+07:00`).toISOString();
+
+// เวลานัดของวันนี้อิงเวลาปัจจุบัน (seed ตอนไหนก็ได้คิวที่ดูสมจริง) — นอกเวลาทำการใช้ 11:00
+const nowTH = new Date().toLocaleTimeString("en-GB", { timeZone: "Asia/Bangkok", hour12: false }).slice(0, 5);
+const nowMin = Number(nowTH.slice(0, 2)) * 60 + Number(nowTH.slice(3, 5));
+const base = nowMin >= 10 * 60 + 30 && nowMin <= 17 * 60 ? Math.floor(nowMin / 5) * 5 : 11 * 60;
+/** เวลาวันนี้ = base + offset นาที (ปัดเป็น 15 นาที สำหรับเวลานัด) */
+const t = (offset: number, round = 15) => {
+  const m = Math.round((base + offset) / round) * round;
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+};
+let q = 0;
+const appt = (
+  date: string,
+  hm: string,
+  durationMin: number,
+  patientId: string,
+  dentistId: string,
+  chairId: string | undefined,
+  procedure: string,
+  status: AppointmentStatus,
+  arrived?: string,
+  called?: string,
+): Appointment => ({
+  id: uid(`appt:${date}:${hm}:${patientId}`).slice(-16),
+  clinicId: clinic.id,
+  patientId,
+  dentistId,
+  chairId,
+  start: `${date}T${hm}`,
+  durationMin,
+  procedure,
+  status,
+  queueNo: arrived ? `A${String(++q).padStart(3, "0")}` : undefined,
+  arrivedAt: arrived && at(date, arrived),
+  calledAt: ["in_room", "awaiting_payment", "done"].includes(status) ? at(date, called ?? hm) : undefined,
+  createdBy: "u3",
+  createdAt: now,
+  updatedAt: now,
+});
+db.appointments = [
+  // [เวลานัด, มาถึง, เรียกเข้าห้อง] อิงเวลาปัจจุบัน
+  appt(today, t(-120), 50, "p4", "u2", "ch1", "ถอนฟัน 48", "done", t(-130, 1)),
+  appt(today, t(-120), 30, "p5", "u1", "ch2", "ตรวจสุขภาพช่องปาก", "done", t(-125, 1)),
+  appt(today, t(-75), 60, "p6", "u1", "ch2", "ครอบฟัน 26 (ลองครอบ)", "awaiting_payment", t(-85, 1), t(-75, 1)),
+  appt(today, t(-30), 45, "p3", "u2", "ch1", "Sealant 75", "in_room", t(-38, 1), t(-25, 1)),
+  appt(today, t(-15), 60, "p7", "u5", "ch3", "ปรับลวดจัดฟัน (งวด 4/24)", "in_room", t(-22, 1), t(-12, 1)),
+  appt(today, t(15), 45, "p1", "u2", "ch1", "RCT 36 — ติดตามผล + พิมพ์ครอบฟัน", "arrived", t(-18, 1)),
+  appt(today, t(0), 30, "p8", "u1", "ch2", "ขูดหินปูน", "arrived", t(-6, 1)),
+  appt(today, t(60), 45, "p2", "u2", "ch1", "อุดฟัน 46 DO", "booked"),
+  appt(today, t(120), 60, "p9", "u1", "ch4", "ขูดหินปูน + ตรวจฟัน", "booked"),
+  appt(today, t(150), 90, "p5", "u5", "ch3", "ติดเครื่องมือจัดฟัน", "booked"),
+  appt(tomorrow, "09:30", 60, "p6", "u1", "ch2", "ยึดครอบฟัน 26", "booked"),
+  appt(tomorrow, "10:00", 30, "p8", "u2", "ch1", "ตรวจติดตามผล", "booked"),
+  appt(tomorrow, "13:30", 60, "p7", "u5", "ch3", "ปรับลวดจัดฟัน", "booked"),
+];
 
 // ---------- SOAP notes (visit ที่ผ่านมา — ลงนามแล้ว) ----------
 const note = (

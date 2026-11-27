@@ -29,3 +29,10 @@ const noopSubscribe = () => () => {};
 export function useHydrated() {
   return useSyncExternalStore(noopSubscribe, () => true, () => false);
 }
+
+/** บทบาทของผู้ใช้ (undefined ระหว่าง render บน server / ก่อน hydrate) — ใช้ในหน้าที่ render บน server ได้ */
+export function useRole() {
+  const hydrated = useHydrated();
+  const role = useSession((s) => s.user?.role);
+  return hydrated ? role : undefined;
+}

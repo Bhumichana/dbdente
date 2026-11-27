@@ -13,7 +13,7 @@ import { age } from "@/lib/age";
 import { api, ApiError } from "@/lib/api";
 import { todayTH } from "@/lib/format";
 import { useSession } from "@/lib/session";
-import type { Patient, Role, SoapNote, ToothRecord, XrayImage } from "@/lib/types";
+import type { Appointment, Patient, Role, SoapNote, ToothRecord, XrayImage } from "@/lib/types";
 import { OverviewTab, SoapTab, SoonPanel, TodayNotePanel } from "./panels";
 import { TreatmentWorkspace } from "./TreatmentWorkspace";
 
@@ -48,6 +48,7 @@ export function PatientFile() {
   const [chart, setChart] = useState<Record<number, ToothRecord>>({});
   const [images, setImages] = useState<XrayImage[]>([]);
   const [notes, setNotes] = useState<SoapNote[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [pacsReadOnly, setPacsReadOnly] = useState(false);
   // สถานะห้องตรวจอยู่ที่นี่ → สลับแท็บแล้วกลับมายังอยู่ที่ซี่/ฟิล์มเดิม
   const [selected, setSelected] = useState<number | null>(null);
@@ -65,6 +66,7 @@ export function PatientFile() {
       })
       .catch((e: ApiError) => setError(e.message));
     api<{ readOnly: boolean }>("/api/health").then((h) => setPacsReadOnly(h.readOnly));
+    api<Appointment[]>(`/api/appointments?patientId=${id}`).then(setAppointments);
     if (!clinical) return;
     api<ToothRecord[]>(`/api/patients/${id}/chart`).then((list) => setChart(Object.fromEntries(list.map((r) => [r.tooth, r]))));
     api<SoapNote[]>(`/api/patients/${id}/notes`).then(setNotes);
@@ -159,7 +161,16 @@ export function PatientFile() {
         </TabsList>
 
         <TabsContent value="overview" className="overflow-y-auto">
-          <OverviewTab patient={patient} clinical={clinical} chart={chart} images={images} notes={notes} onGo={go} />
+          <OverviewTab
+            patient={patient}
+            clinical={clinical}
+            chart={chart}
+            images={images}
+            notes={notes}
+            appointments={appointments}
+            canEditInfo={role === "owner" || role === "receptionist"}
+            onGo={go}
+          />
         </TabsContent>
 
         {clinical && (

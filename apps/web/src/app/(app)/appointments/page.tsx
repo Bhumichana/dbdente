@@ -1,5 +1,8 @@
-import { ComingSoon } from "@/components/shell/ComingSoon";
+"use client";
 
-export default function Page() {
-  return <ComingSoon href="/appointments" />;
+import { AppointmentCalendar } from "@/components/appointments/AppointmentCalendar";
+import { useRole } from "@/lib/session";
+
+export default function AppointmentsPage() {
+  return useRole() ? <AppointmentCalendar /> : null;
 }

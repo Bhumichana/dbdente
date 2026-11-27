@@ -1,15 +1,18 @@
 "use client";
 
-import { Check, ClipboardList, FileImage, NotebookPen, Phone, TriangleAlert } from "lucide-react";
+import { CalendarDays, Check, ClipboardList, FileImage, NotebookPen, Pencil, Phone, TriangleAlert } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { SoapEditor, SoapView } from "@/components/soap/SoapNote";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/feedback";
 import { age } from "@/lib/age";
+import { nowLocal } from "@/lib/clinic";
+import { cn } from "@/lib/cn";
 import { thaiDate } from "@/lib/format";
-import { FILM_LABEL, type Patient, type SoapNote, type ToothRecord, type XrayImage } from "@/lib/types";
+import { APPT_STATUS, FILM_LABEL, type Appointment, type Patient, type SoapNote, type ToothRecord, type XrayImage } from "@/lib/types";
 
 const SURF_TH: Record<string, string> = { M: "M", O: "O", D: "D", B: "B", L: "L" };
 
@@ -42,6 +45,8 @@ export function OverviewTab({
   chart,
   images,
   notes,
+  appointments,
+  canEditInfo,
   onGo,
 }: {
   patient: Patient;
@@ -49,8 +54,13 @@ export function OverviewTab({
   chart: Record<number, ToothRecord>;
   images: XrayImage[];
   notes: SoapNote[];
+  appointments: Appointment[];
+  canEditInfo: boolean;
   onGo: (tab: string) => void;
 }) {
+  const now = nowLocal();
+  const upcoming = appointments.filter((a) => a.start >= now.slice(0, 10) && ["booked", "arrived", "in_room"].includes(a.status)).reverse();
+  const past = appointments.filter((a) => !upcoming.includes(a)).slice(0, 5);
   const plan = plannedItems(chart);
   const lastNote = notes.find((n) => n.signedAt) ?? notes[0];
   const byType = images.reduce<Record<string, number>>((a, i) => ((a[i.filmType] = (a[i.filmType] ?? 0) + 1), a), {});
@@ -59,7 +69,17 @@ export function OverviewTab({
   return (
     <div className="mx-auto grid w-full max-w-6xl gap-4 p-4 sm:p-6 lg:grid-cols-2">
       <Card>
-        <CardHeader title="ข้อมูลคนไข้" />
+        <CardHeader
+          title="ข้อมูลคนไข้"
+          actions={
+            canEditInfo && (
+              <Link href={`/patients/${patient.id}/edit`} className={buttonClass("ghost", "sm")}>
+                <Pencil />
+                แก้ไขข้อมูล
+              </Link>
+            )
+          }
+        />
         <dl className="divide-y divide-ink-100 px-4 py-2">
           <Row label="HN">
             <span className="font-mono">{patient.hn}</span>
@@ -68,6 +88,11 @@ export function OverviewTab({
           <Row label="เพศ / อายุ">
             {patient.sex === "M" ? "ชาย" : "หญิง"} · {age(patient.birthDate)} ปี
           </Row>
+          {patient.citizenId && (
+            <Row label="เลขบัตรประชาชน">
+              <span className="font-mono">{patient.citizenId.replace(/^(\d)(\d{4})(\d{5})(\d{2})(\d)$/, "$1-$2-$3-$4-$5")}</span>
+            </Row>
+          )}
           <Row label="วันเกิด">{thaiDate(patient.birthDate, { day: "numeric", month: "long", year: "numeric" })}</Row>
           <Row label="โทรศัพท์">
             {patient.phone ? (
@@ -79,6 +104,13 @@ export function OverviewTab({
               "–"
             )}
           </Row>
+          {patient.emergencyContact && (
+            <Row label="ผู้ติดต่อฉุกเฉิน">
+              {patient.emergencyContact.name}
+              {patient.emergencyContact.relation && ` (${patient.emergencyContact.relation})`} ·{" "}
+              <span className="font-mono">{patient.emergencyContact.phone}</span>
+            </Row>
+          )}
           {clinical && patient.dicomPatientId && (
             <Row label="PatientID (PACS)">
               <span className="font-mono text-ink-600">{patient.dicomPatientId}</span>
@@ -193,14 +225,36 @@ export function OverviewTab({
             </div>
           </Card>
         </>
-      ) : (
-        <Card className="lg:col-span-2">
-          <CardHeader title="นัดหมายและการเงิน" />
-          <p className="px-4 py-4 text-sm text-ink-500">
-            นัดหมายครั้งถัดไป ยอดค้างชำระ และมัดจำของคนไข้จะแสดงที่นี่ (Phase 1)
-          </p>
-        </Card>
-      )}
+      ) : null}
+
+      <Card className="lg:col-span-2">
+        <CardHeader
+          title="นัดหมาย"
+          description={upcoming.length ? `นัดที่จะถึง ${upcoming.length} ครั้ง` : "ไม่มีนัดที่จะถึง"}
+          actions={
+            <Link href="/appointments" className={buttonClass("ghost", "sm")}>
+              <CalendarDays />
+              เปิดปฏิทิน
+            </Link>
+          }
+        />
+        {upcoming.length + past.length ? (
+          <ul className="divide-y divide-ink-100">
+            {[...upcoming, ...past].map((a) => (
+              <li key={a.id} className={cn("flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 text-sm", !upcoming.includes(a) && "text-ink-500")}>
+                <span className="w-44 font-mono">
+                  {thaiDate(a.start.slice(0, 10))} {a.start.slice(11)}
+                </span>
+                <span className="min-w-0 flex-1 truncate">{a.procedure}</span>
+                <span className="text-ink-500">{a.dentistName}</span>
+                <Badge tone={APPT_STATUS[a.status].tone}>{APPT_STATUS[a.status].label}</Badge>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="px-4 py-4 text-sm text-ink-500">ยังไม่มีประวัตินัดหมาย</p>
+        )}
+      </Card>
     </div>
   );
 }

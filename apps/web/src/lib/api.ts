@@ -13,6 +13,8 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    /** เนื้อหา error จาก API เช่น { field, existingId } */
+    public body: Record<string, unknown> = {},
   ) {
     super(message);
   }
@@ -28,7 +30,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (res.status === 401) useSession.getState().logout();
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, body.error ?? res.statusText);
+    throw new ApiError(res.status, body.error ?? res.statusText, body);
   }
   return res.json() as Promise<T>;
 }

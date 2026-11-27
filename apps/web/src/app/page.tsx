@@ -21,7 +21,7 @@ export default function DemoLogin() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (hydrated && token) router.replace("/patients");
+    if (hydrated && token) router.replace("/queue");
   }, [hydrated, token, router]);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function DemoLogin() {
       body: JSON.stringify({ userId: u.id }),
     });
     setSession(r.token, { ...r.user, clinicName: u.clinicName });
-    router.push("/patients");
+    router.push("/queue"); // หน้าแรกของทุกบทบาท = งานของวันนี้
   }
 
   return (

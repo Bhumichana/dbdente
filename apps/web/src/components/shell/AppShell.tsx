@@ -15,7 +15,7 @@ import { ROLE_LABEL, type User } from "@/lib/types";
 import { PatientSearch } from "./PatientSearch";
 
 /** หน้าที่ต้องการพื้นที่ทำงานเต็มที่ (ห้องตรวจ) — เมนูย่อเป็นแถบไอคอนเสมอ */
-const isWorkspace = (path: string) => /^\/patients\/[^/]+/.test(path);
+const isWorkspace = (path: string) => /^\/patients\/(?!new$)[^/]+$/.test(path);
 
 const SlotContext = createContext<HTMLElement | null>(null);
 
@@ -153,7 +153,7 @@ function SidebarBody({
   return (
     <div className="flex h-full flex-col pb-[env(safe-area-inset-bottom)]">
       <Link
-        href="/patients"
+        href="/queue"
         onClick={onNavigate}
         className={cn("flex h-14 shrink-0 items-center gap-2.5 px-3.5", center)}
         title={user?.clinicName}
