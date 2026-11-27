@@ -1,0 +1,13 @@
+{
+  "name": "dbdente",
+  "private": true,
+  "description": "DBDente — Dental clinic management + integrated Web DICOM (Phase 0 demo)",
+  "scripts": {
+    "setup": "npm install && npm --prefix apps/api install && npm --prefix apps/web install && npm --prefix apps/api run seed",
+    "seed": "npm --prefix apps/api run seed",
+    "dev": "concurrently -k -n api,web -c cyan,magenta \"npm --prefix apps/api run dev\" \"npm --prefix apps/web run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}

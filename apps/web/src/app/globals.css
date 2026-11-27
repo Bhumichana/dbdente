@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-thai), ui-sans-serif, system-ui, sans-serif;
+  --color-brand-50: #eef7f7;
+  --color-brand-100: #d5eded;
+  --color-brand-500: #14868a;
+  --color-brand-600: #0f6f73;
+  --color-brand-700: #0c585b;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: #f4f6f8;
+  color: #0f172a;
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* viewer: ปิด gesture ของเบราว์เซอร์ เพื่อให้ Cornerstone รับ touch เอง */
+.cs-viewport {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
