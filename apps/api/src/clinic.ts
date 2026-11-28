@@ -125,10 +125,11 @@ function parseAppointment(req: AuthedRequest, base?: Appointment) {
   const patientId = String(body.patientId ?? base?.patientId ?? "");
   if (!db.patients.some((p) => p.id === patientId && p.clinicId === clinicId)) return { error: "เลือกคนไข้" };
   const dentistId = String(body.dentistId ?? base?.dentistId ?? "");
-  if (!db.users.some((u) => u.id === dentistId && u.clinicId === clinicId && (u.role === "dentist" || u.role === "owner")))
+  // หมอ/เก้าอี้ที่ปิดใช้งาน ใช้กับนัดใหม่ไม่ได้ (นัดเดิมที่ไม่ได้เปลี่ยนค่านี้ยังแก้ไขได้)
+  if (!db.users.some((u) => u.id === dentistId && u.clinicId === clinicId && (u.role === "dentist" || u.role === "owner") && (u.active !== false || dentistId === base?.dentistId)))
     return { error: "เลือกทันตแพทย์" };
   const chairId = body.chairId === undefined ? base?.chairId : String(body.chairId || "") || undefined;
-  if (chairId && !db.chairs.some((c) => c.id === chairId && c.clinicId === clinicId)) return { error: "ไม่พบเก้าอี้" };
+  if (chairId && !db.chairs.some((c) => c.id === chairId && c.clinicId === clinicId && (c.active !== false || chairId === base?.chairId))) return { error: "ไม่พบเก้าอี้" };
   const start = String(body.start ?? base?.start ?? "");
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(start) || minutesOf(start) % 5) return { error: "เวลานัดไม่ถูกต้อง" };
   const durationMin = Number(body.durationMin ?? base?.durationMin ?? 30);
@@ -166,13 +167,13 @@ export function registerClinicRoutes(app: Express) {
   app.get("/api/staff/dentists", (req: AuthedRequest, res) => {
     res.json(
       getDb()
-        .users.filter((u) => u.clinicId === req.user!.clinicId && (u.role === "dentist" || u.role === "owner"))
+        .users.filter((u) => u.clinicId === req.user!.clinicId && u.active !== false && (u.role === "dentist" || u.role === "owner"))
         .map((u) => ({ id: u.id, name: u.name })),
     );
   });
 
   app.get("/api/chairs", (req: AuthedRequest, res) => {
-    res.json(getDb().chairs.filter((c) => c.clinicId === req.user!.clinicId));
+    res.json(getDb().chairs.filter((c) => c.clinicId === req.user!.clinicId && c.active !== false));
   });
 
   app.put("/api/chairs/:id", requireRole("owner", "receptionist", "assistant"), (req: AuthedRequest, res) => {

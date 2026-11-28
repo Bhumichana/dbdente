@@ -111,16 +111,6 @@ export const NAV: NavGroup[] = [
         label: "ตั้งค่าคลินิก",
         icon: Settings,
         roles: ["owner"],
-        soon: {
-          phase: "Phase 1",
-          summary: "ข้อมูลคลินิก ผู้ใช้ และค่าพื้นฐานของระบบ",
-          features: [
-            "สาขา และเก้าอี้ทำฟัน",
-            "ผู้ใช้และบทบาท",
-            "รายการหัตถการและราคา",
-            "เทมเพลตเอกสารยินยอม (E-Consent)",
-          ],
-        },
       },
       { href: "/audit", label: "Audit Log", icon: ShieldCheck, roles: ["owner"] },
     ],

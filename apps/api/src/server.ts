@@ -12,6 +12,7 @@ import { registerDfRoutes } from "./df.js";
 import { registerLabRoutes } from "./lab.js";
 import { registerPlanRoutes } from "./plans.js";
 import { registerReportRoutes } from "./reports.js";
+import { registerSettingsRoutes } from "./settings.js";
 import { registerStockRoutes } from "./stock.js";
 import {
   dicomPatientId,
@@ -82,11 +83,11 @@ app.get("/api/health", (_req, res) => res.json({ ok: true, imageSource: images.n
 // เดโม: เลือกผู้ใช้จากรายการแทนการกรอกรหัสผ่าน (ระยะ 1 จะใช้ระบบ login จริง)
 app.get("/api/auth/demo-users", (_req, res) => {
   const { users, clinics } = getDb();
-  res.json(users.map((u) => ({ ...u, clinicName: clinics.find((c) => c.id === u.clinicId)?.name })));
+  res.json(users.filter((u) => u.active !== false).map((u) => ({ ...u, clinicName: clinics.find((c) => c.id === u.clinicId)?.name })));
 });
 
 app.post("/api/auth/demo-login", (req, res) => {
-  const user = getDb().users.find((u) => u.id === req.body?.userId);
+  const user = getDb().users.find((u) => u.id === req.body?.userId && u.active !== false);
   if (!user) return void res.status(404).json({ error: "ไม่พบผู้ใช้" });
   audit({ userId: user.id, clinicId: user.clinicId, action: "LOGIN", ip: req.ip });
   res.json({ token: signToken(user), user });
@@ -373,6 +374,7 @@ registerPlanRoutes(app);
 registerDfRoutes(app);
 registerLabRoutes(app);
 registerStockRoutes(app);
+registerSettingsRoutes(app);
 registerBridgeRoutes(app);
 registerReportRoutes(app);
 
@@ -394,6 +396,6 @@ app.use((err: Error, _req: AuthedRequest, res: Response, _next: NextFunction) =>
 });
 
 const server = app.listen(config.port, () => {
-  console.log(`DBDente API http://localhost:${config.port}  (image source: ${images.name})`);
+  console.log(`DBDenté API http://localhost:${config.port}  (image source: ${images.name})`);
 });
 attachRealtime(server, corsOrigin);

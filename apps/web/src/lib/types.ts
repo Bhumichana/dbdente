@@ -467,3 +467,64 @@ export interface ReportSummary {
   topProcedures: { label: string; revenue: number }[];
   watch?: { outstanding: number; deposits: number; labOverdue: number; stockLow: number };
 }
+
+// ---------- ตั้งค่าคลินิก (เจ้าของเท่านั้น) ----------
+/** active: false = ปิดใช้งาน (ไม่แสดงในตัวเลือกของหน้าอื่น แต่เอกสารเก่ายังอ้างถึงได้) */
+export interface SettingsClinic {
+  id: string;
+  code: string;
+  name: string;
+  address?: string;
+  taxId?: string;
+  phone?: string;
+  hasKioskPin: boolean;
+}
+export interface SettingsProcedure {
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  price: number;
+  keywords: string[];
+  materialCost?: number;
+  materials?: { itemId: string; qty: number }[];
+  active?: boolean;
+}
+export interface SettingsMaterial {
+  id: string;
+  code: string;
+  name: string;
+  unit: string;
+  category: string;
+  reorderPoint: number;
+  onHand: number;
+  active?: boolean;
+}
+export interface SettingsLab {
+  id: string;
+  name: string;
+  phone?: string;
+  openCases: number;
+  active?: boolean;
+}
+export interface SettingsChair {
+  id: string;
+  name: string;
+  status: ChairStatus;
+  upcoming: number;
+  active?: boolean;
+}
+export interface SettingsUser {
+  id: string;
+  name: string;
+  role: Role;
+  active?: boolean;
+}
+export interface SettingsData {
+  clinic: SettingsClinic;
+  procedures: SettingsProcedure[];
+  materials: SettingsMaterial[];
+  labs: SettingsLab[];
+  chairs: SettingsChair[];
+  users: SettingsUser[];
+}

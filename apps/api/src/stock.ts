@@ -109,8 +109,9 @@ export function registerStockRoutes(app: Express) {
 
   app.get("/api/stock", requireRole(...ROLES), (req: AuthedRequest, res) => {
     const db = getDb();
-    const items = db.stockItems.filter((i) => i.clinicId === req.user!.clinicId);
-    const names = Object.fromEntries(items.map((i) => [i.id, i.name]));
+    const items = db.stockItems.filter((i) => i.clinicId === req.user!.clinicId && i.active !== false);
+    // ชื่อจากทุกรายการ (รวมที่ปิดใช้งาน) เพื่อให้ประวัติเคลื่อนไหวเก่ายังอ่านได้
+    const names = Object.fromEntries(db.stockItems.filter((i) => i.clinicId === req.user!.clinicId).map((i) => [i.id, i.name]));
     res.json({
       items: items.map(itemView).sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name)),
       moves: db.stockMoves

@@ -54,7 +54,7 @@ const item = (p: ProcedureItem | undefined, name: string, teeth: number[], denti
  *  2) ถ้าไม่มี ใช้หัตถการของนัด จับคู่กับรายการราคาของคลินิก
  */
 export function draftItems(db: Db, a: Appointment): InvoiceItem[] {
-  const procs = db.procedures.filter((p) => p.clinicId === a.clinicId);
+  const procs = db.procedures.filter((p) => p.clinicId === a.clinicId && p.active !== false);
   const day = a.start.slice(0, 10);
   const fromChart = Object.values(db.charts[a.patientId] ?? {})
     .filter(
@@ -235,9 +235,9 @@ function closeTotals(list: Invoice[]) {
 const FRONT = ["owner", "receptionist"] as const;
 
 export function registerBillingRoutes(app: Express) {
-  /** รายการหัตถการและราคา (ทุกบทบาท — หมอใช้ดูราคาตอนคุยแผนการรักษา) */
+  /** รายการหัตถการและราคา (ทุกบทบาท — หมอใช้ดูราคาตอนคุยแผนการรักษา) · ไม่รวมรายการที่ปิดใช้งาน */
   app.get("/api/procedures", (req: AuthedRequest, res) => {
-    res.json(getDb().procedures.filter((p) => p.clinicId === req.user!.clinicId));
+    res.json(getDb().procedures.filter((p) => p.clinicId === req.user!.clinicId && p.active !== false));
   });
 
   /** หน้ารับชำระ: บิลรอชำระ + ใบเสร็จวันนี้ */

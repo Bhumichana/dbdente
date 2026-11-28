@@ -60,7 +60,7 @@ function parse(req: AuthedRequest, base?: LabCase): { ok: Partial<LabCase> } | {
   const dentistId = String(pick("dentistId") ?? "");
   if (!db.users.some((u) => u.id === dentistId && u.clinicId === clinicId && (u.role === "dentist" || u.role === "owner"))) return { error: "เลือกทันตแพทย์" };
   const labId = String(pick("labId") ?? "");
-  if (!db.labs.some((l) => l.id === labId && l.clinicId === clinicId)) return { error: "เลือกแล็บ" };
+  if (!db.labs.some((l) => l.id === labId && l.clinicId === clinicId && (l.active !== false || labId === base?.labId))) return { error: "เลือกแล็บ" };
   const work = String(pick("work") ?? "").trim().slice(0, 120);
   if (!work) return { error: "ระบุงาน เช่น ครอบฟัน PFM" };
   const teeth = Array.isArray(pick("teeth")) ? [...new Set((pick("teeth") as unknown[]).map(Number))] : [];
@@ -99,7 +99,7 @@ function parse(req: AuthedRequest, base?: LabCase): { ok: Partial<LabCase> } | {
 
 export function registerLabRoutes(app: Express) {
   app.get("/api/labs", requireRole(...ROLES), (req: AuthedRequest, res) => {
-    res.json(getDb().labs.filter((l) => l.clinicId === req.user!.clinicId));
+    res.json(getDb().labs.filter((l) => l.clinicId === req.user!.clinicId && l.active !== false));
   });
 
   /** ทันตแพทย์เห็นเฉพาะงานของตัวเอง */

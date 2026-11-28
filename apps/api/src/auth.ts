@@ -20,7 +20,7 @@ export function requireAuth(req: AuthedRequest, res: Response, next: NextFunctio
   try {
     const payload = jwt.verify(token, config.jwtSecret) as { sub: string };
     const user = getDb().users.find((u) => u.id === payload.sub);
-    if (!user) throw new Error("unknown user");
+    if (!user || user.active === false) throw new Error("unknown or disabled user");
     req.user = user;
     next();
   } catch {

@@ -19,6 +19,8 @@ export interface User {
   clinicId: string;
   name: string;
   role: Role;
+  /** false = ปิดใช้งาน (ไม่ลบ เพราะเอกสารเก่ายังอ้างถึง) */
+  active?: boolean;
 }
 
 export interface Patient {
@@ -99,7 +101,8 @@ export interface AuditEntry {
     | "LAB_CASE"
     | "STOCK_MOVE"
     | "BRIDGE_MATCH"
-    | "BRIDGE_RETRY";
+    | "BRIDGE_RETRY"
+    | "SETTINGS";
   patientId?: string;
   target?: string;
   ip?: string;
@@ -130,6 +133,8 @@ export interface Chair {
   name: string;
   status: ChairStatus;
   updatedAt: string;
+  /** false = ปิดใช้งาน (ไม่ลบ เพราะเอกสารเก่ายังอ้างถึง) */
+  active?: boolean;
 }
 
 /**
@@ -176,6 +181,8 @@ export interface ProcedureItem {
   materialCost?: number;
   /** วัสดุที่ตัดสต็อกเมื่อรับชำระ (ต่อ 1 หน่วยของรายการ) */
   materials?: { itemId: string; qty: number }[];
+  /** false = ปิดใช้งาน (ไม่ลบ เพราะเอกสารเก่ายังอ้างถึง) */
+  active?: boolean;
 }
 
 export interface InvoiceItem {
@@ -327,6 +334,8 @@ export interface Lab {
   clinicId: string;
   name: string;
   phone?: string;
+  /** false = ปิดใช้งาน (ไม่ลบ เพราะเอกสารเก่ายังอ้างถึง) */
+  active?: boolean;
 }
 
 export type LabStatus = "sent" | "received" | "fitted" | "remake" | "cancelled";
@@ -369,6 +378,8 @@ export interface StockItem {
   category: string;
   reorderPoint: number;
   lots: StockLot[];
+  /** false = ปิดใช้งาน (ไม่ลบ เพราะเอกสารเก่ายังอ้างถึง) */
+  active?: boolean;
 }
 export interface StockMove {
   id: string;
