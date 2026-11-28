@@ -1,4 +1,4 @@
-# DBDente — Phase 0 Demo
+# DBDenté — Phase 0 Demo
 
 ระบบบริหารคลินิกทันตกรรม + Integrated Web DICOM Viewer (เดโมสำหรับ Customer Discovery)
 

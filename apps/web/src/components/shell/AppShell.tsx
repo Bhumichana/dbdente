@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Menu className="size-5" />
             </button>
             <span className={cn("shrink-0 font-semibold text-ink-900", compact && "hidden lg:inline")}>
-              {item?.label ?? "DBDente"}
+              {item?.label ?? "DBDenté"}
             </span>
             <div ref={setSlot} className="flex min-w-0 flex-1 items-center gap-3 empty:hidden" />
             <span className="flex-1" />
@@ -161,11 +161,11 @@ function SidebarBody({
         className={cn("flex h-14 shrink-0 items-center gap-2.5 px-3.5", center)}
         title={user?.clinicName}
       >
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-navy-700 font-bold text-white ring-1 ring-navy-500">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-navy-700 font-bold text-white ring-1 ring-teal-400/70">
           D
         </span>
         <span className={cn("min-w-0 leading-tight", text)}>
-          <span className="block font-semibold text-white">DBDente</span>
+          <span className="block font-semibold text-white">DBDenté</span>
           <span className="block truncate text-xs text-navy-200">{user?.clinicName}</span>
         </span>
       </Link>
@@ -191,10 +191,10 @@ function SidebarBody({
                       className={cn(
                         "flex h-11 items-center gap-3 rounded-lg px-2.5 text-sm transition-colors",
                         center,
-                        active ? "bg-navy-800 font-medium text-white" : "hover:bg-navy-900 hover:text-white",
+                        active ? "bg-navy-800 font-medium text-white shadow-[inset_3px_0_0_var(--color-teal-400)]" : "hover:bg-navy-900 hover:text-white",
                       )}
                     >
-                      <Icon className={cn("size-5 shrink-0", active ? "text-navy-300" : "opacity-80")} />
+                      <Icon className={cn("size-5 shrink-0", active ? "text-teal-300" : "opacity-80")} />
                       <span className={cn("flex-1 truncate", text)}>{i.label}</span>
                       {i.soon && (
                         <span className={cn("rounded-full border border-navy-700 px-1.5 text-[10px] text-navy-300", showWhenWide)}>

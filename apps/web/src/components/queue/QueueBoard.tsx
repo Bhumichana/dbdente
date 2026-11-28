@@ -98,8 +98,8 @@ export function QueueBoard() {
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold">คิววันนี้</h1>
         <span className="text-sm text-ink-500">{thaiDate(today, { weekday: "long", day: "numeric", month: "long" })}</span>
-        <span className={cn("flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs", live ? "bg-success-soft text-success" : "bg-ink-100 text-ink-500")}>
-          <span className={cn("size-2 rounded-full", live ? "animate-pulse bg-success" : "bg-ink-400")} />
+        <span className={cn("flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs", live ? "bg-teal-50 text-teal-700" : "bg-ink-100 text-ink-500")}>
+          <span className={cn("size-2 rounded-full", live ? "animate-pulse bg-teal-500" : "bg-ink-400")} />
           {live ? "อัปเดตอัตโนมัติ" : "กำลังเชื่อมต่อ…"}
         </span>
         <span className="flex-1" />
@@ -389,7 +389,7 @@ function WalkInDialog({ dentists, onDone }: { dentists: { id: string; name: stri
             คนไข้
           </label>
           <PatientPicker id="walkin-patient" value={patient} onChange={setPatient} />
-          <Link href="/patients/new" className="text-xs text-navy-700 underline">
+          <Link href="/patients/new" className="text-xs text-teal-700 underline">
             คนไข้ใหม่? ลงทะเบียนก่อน
           </Link>
         </div>

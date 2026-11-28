@@ -41,7 +41,7 @@ export function ToothChart({ records, filmCount, selected, onSelect, dentition, 
             key={t}
             onClick={() => onSelect(isSel ? null : t)}
             className={`relative flex flex-col items-center gap-1 rounded-md px-[2px] py-1 transition ${
-              isSel ? "bg-navy-100 ring-2 ring-navy-500" : "hover:bg-ink-100"
+              isSel ? "bg-teal-50 ring-2 ring-teal-500" : "hover:bg-ink-100"
             } ${midline ? "before:absolute before:top-1 before:bottom-1 before:-left-[2px] before:w-px before:bg-ink-400" : ""}`}
             data-tooth={t}
             title={[`ซี่ ${t}`, rec?.procedure, films ? `ฟิล์ม ${films} ภาพ` : ""].filter(Boolean).join(" · ")}

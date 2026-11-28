@@ -130,11 +130,11 @@ export function PatientBilling({ patient }: { patient: Patient }) {
                   </TD>
                   <TD>
                     {i.receiptNo ? (
-                      <Link href={`/billing/receipt/${i.id}`} className="font-mono text-navy-700 hover:underline">
+                      <Link href={`/billing/receipt/${i.id}`} className="font-mono text-teal-700 hover:underline">
                         {i.receiptNo}
                       </Link>
                     ) : (
-                      <Link href={`/billing?id=${i.id}`} className="text-navy-700 hover:underline">
+                      <Link href={`/billing?id=${i.id}`} className="text-teal-700 hover:underline">
                         รับชำระ
                       </Link>
                     )}

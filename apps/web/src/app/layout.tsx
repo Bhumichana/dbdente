@@ -16,7 +16,7 @@ const num = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DBDente — Dental Clinic + Web DICOM (Demo)",
+  title: "DBDenté — Dental Clinic + Web DICOM (Demo)",
   description: "เดโมระบบบริหารคลินิกทันตกรรมพร้อม Web DICOM Viewer",
 };
 

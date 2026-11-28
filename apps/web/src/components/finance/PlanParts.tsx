@@ -80,7 +80,7 @@ export function PlanSchedule({ plan, canBill }: { plan: InstallmentPlan; canBill
               </td>
               <td className="py-1.5 text-right">
                 {r.status === "paid" && r.invoiceId && (
-                  <Link href={`/billing/receipt/${r.invoiceId}`} className="font-mono text-xs text-navy-700 hover:underline">
+                  <Link href={`/billing/receipt/${r.invoiceId}`} className="font-mono text-xs text-teal-700 hover:underline">
                     {r.receiptNo}
                   </Link>
                 )}

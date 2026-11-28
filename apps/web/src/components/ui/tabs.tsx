@@ -21,7 +21,7 @@ export function TabsTrigger({ className, ...p }: ComponentProps<typeof T.Trigger
     <T.Trigger
       className={cn(
         "-mb-px flex h-11 shrink-0 items-center gap-1.5 border-b-2 border-transparent px-3 text-sm whitespace-nowrap text-ink-500 transition-colors",
-        "hover:text-ink-800 data-[state=active]:border-navy-700 data-[state=active]:font-semibold data-[state=active]:text-navy-700",
+        "hover:text-ink-800 data-[state=active]:border-teal-600 data-[state=active]:font-semibold data-[state=active]:text-navy-700",
         "[&_svg]:size-4",
         className,
       )}

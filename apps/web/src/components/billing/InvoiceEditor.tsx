@@ -465,7 +465,7 @@ export function InvoiceEditor({
                   <Banknote className="size-4 text-navy-600" />
                   เงินสด
                   <button
-                    className="ml-auto text-xs text-navy-700 hover:underline"
+                    className="ml-auto text-xs text-teal-700 hover:underline"
                     onClick={() => fill("cash")}
                   >
                     เต็มจำนวนที่เหลือ
@@ -518,7 +518,7 @@ export function InvoiceEditor({
                   <Landmark className="size-4 text-navy-600" />
                   โอน / PromptPay
                   <button
-                    className="ml-auto text-xs text-navy-700 hover:underline"
+                    className="ml-auto text-xs text-teal-700 hover:underline"
                     onClick={() => fill("transfer")}
                   >
                     เต็มจำนวนที่เหลือ
@@ -550,7 +550,7 @@ export function InvoiceEditor({
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <CreditCard className="size-4 text-navy-600" />
                   บัตรเครดิต/เดบิต
-                  <button className="ml-auto text-xs text-navy-700 hover:underline" onClick={() => fill("card")}>
+                  <button className="ml-auto text-xs text-teal-700 hover:underline" onClick={() => fill("card")}>
                     เต็มจำนวนที่เหลือ
                   </button>
                 </div>
@@ -580,7 +580,7 @@ export function InvoiceEditor({
                       คงเหลือ <span className="font-mono">{baht(depositBal)}</span>
                     </span>
                     {depositBal > 0 && (
-                      <button className="ml-auto text-xs text-navy-700 hover:underline" onClick={() => fill("deposit")}>
+                      <button className="ml-auto text-xs text-teal-700 hover:underline" onClick={() => fill("deposit")}>
                         ใช้มัดจำ
                       </button>
                     )}

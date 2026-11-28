@@ -47,7 +47,7 @@ export default function DemoLogin() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-700 text-xl font-bold text-white">
             D
           </div>
-          <h1 className="text-2xl font-semibold">DBDente</h1>
+          <h1 className="text-2xl font-semibold">DBDenté</h1>
           <p className="text-ink-500">ระบบคลินิกทันตกรรม + Web DICOM Viewer — เดโมระยะ 0</p>
         </div>
 

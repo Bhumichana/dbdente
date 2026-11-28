@@ -38,7 +38,7 @@ export function BillingWorkspace() {
     <div className="grid content-start gap-4 p-4 sm:p-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
       <aside className={cn("grid content-start gap-4", id && "hidden lg:grid")}>
         <div className="flex items-center gap-2">
-          <span className={cn("size-2 rounded-full", live ? "bg-success" : "bg-ink-300")} title={live ? "เชื่อมต่อ real-time" : "ออฟไลน์"} />
+          <span className={cn("size-2 rounded-full", live ? "bg-teal-500" : "bg-ink-300")} title={live ? "เชื่อมต่อ real-time" : "ออฟไลน์"} />
           <span className="text-sm text-ink-500">
             วันนี้รับแล้ว <b className="font-mono text-ink-900">฿{baht(todayTotal)}</b> · <span className="font-mono">{todayPaid.length}</span> ใบ
           </span>
@@ -62,7 +62,7 @@ export function BillingWorkspace() {
               aria-current={i.id === id || undefined}
               className={cn(
                 "grid gap-1 rounded-xl border bg-white p-3 text-left transition-colors hover:border-navy-300",
-                i.id === id ? "border-navy-500 ring-2 ring-navy-100" : "border-ink-200",
+                i.id === id ? "border-teal-500 ring-2 ring-teal-100" : "border-ink-200",
                 (i.patient?.allergies.length ?? 0) > 0 && "border-l-4 border-l-danger",
               )}
             >

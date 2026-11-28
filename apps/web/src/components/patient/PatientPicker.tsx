@@ -85,7 +85,7 @@ export function PatientPicker({
         aria-invalid={invalid || undefined}
         autoComplete="off"
         className={cn(
-          "h-10 w-full rounded-lg border border-ink-300 bg-white pr-3 pl-9 text-sm placeholder:text-ink-400 focus:border-navy-500 focus:ring-2 focus:ring-navy-100 focus:outline-none",
+          "h-10 w-full rounded-lg border border-ink-300 bg-white pr-3 pl-9 text-sm placeholder:text-ink-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 focus:outline-none",
           invalid && "border-danger",
         )}
       />

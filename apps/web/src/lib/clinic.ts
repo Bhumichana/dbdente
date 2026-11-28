@@ -15,13 +15,13 @@ export function useClinicRefs() {
   return { dentists, chairs, setChairs, reloadChairs: () => api<Chair[]>("/api/chairs").then(setChairs) };
 }
 
-/** สีประจำทันตแพทย์ในปฏิทิน (ตามลำดับ) — แยกจากสีสถานะ */
+/** สีประจำทันตแพทย์ในปฏิทิน (ตามลำดับ) — แยกจากสีสถานะ และไม่ใช้ teal (สงวนให้ accent ของแบรนด์) */
 const PALETTE = [
   { block: "bg-navy-100 border-navy-700 text-navy-900", dot: "bg-navy-700" },
-  { block: "bg-[#e2f1f3] border-[#1b7d86] text-[#0f4d53]", dot: "bg-[#1b7d86]" },
   { block: "bg-[#f1ebfa] border-[#6b4bb8] text-[#3e2a75]", dot: "bg-[#6b4bb8]" },
   { block: "bg-[#fdf1e3] border-[#b86a12] text-[#6b3d08]", dot: "bg-[#b86a12]" },
   { block: "bg-[#fbe9ef] border-[#b03a62] text-[#6e1f3a]", dot: "bg-[#b03a62]" },
+  { block: "bg-[#f3eee8] border-[#7d5a3c] text-[#4a3422]", dot: "bg-[#7d5a3c]" },
 ];
 export const dentistColor = (dentists: Dentist[], id: string) => PALETTE[Math.max(0, dentists.findIndex((d) => d.id === id)) % PALETTE.length];
 

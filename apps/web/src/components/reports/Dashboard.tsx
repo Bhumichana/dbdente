@@ -212,7 +212,7 @@ function DailyBars({ days }: { days: { date: string; revenue: number }[] }) {
                   // มุมโค้งเฉพาะด้านบน ฐานติดแกน
                   <path
                     d={`M${x + 1},${H - padB} V${yTop + r} Q${x + 1},${yTop} ${x + 1 + r},${yTop} H${x + 1 + barW - r} Q${x + 1 + barW},${yTop} ${x + 1 + barW},${yTop + r} V${H - padB} Z`}
-                    className={cn(hover === i ? "fill-navy-800" : "fill-navy-600")}
+                    className={cn(hover === i ? "fill-teal-700" : "fill-teal-500")}
                   />
                 )}
                 {i % labelEvery === 0 && (
@@ -238,7 +238,7 @@ function DailyBars({ days }: { days: { date: string; revenue: number }[] }) {
         )}
       </div>
       <details className="text-sm">
-        <summary className="cursor-pointer text-navy-700">ดูเป็นตาราง</summary>
+        <summary className="cursor-pointer text-teal-700">ดูเป็นตาราง</summary>
         <div className="mt-2 max-h-64 overflow-y-auto">
           <table className="w-full">
             <tbody className="divide-y divide-ink-100">
@@ -270,7 +270,7 @@ function RankBars({ rows, total }: { rows: { label: string; revenue: number }[];
             <span className="w-12 text-right font-mono text-xs text-ink-500">{total ? `${Math.round((r.revenue / total) * 100)}%` : ""}</span>
           </div>
           <div className="h-2 rounded-r bg-ink-100/60">
-            <div className="h-2 rounded-r bg-navy-600" style={{ width: `${(r.revenue / max) * 100}%` }} />
+            <div className="h-2 rounded-r bg-teal-500" style={{ width: `${(r.revenue / max) * 100}%` }} />
           </div>
         </li>
       ))}

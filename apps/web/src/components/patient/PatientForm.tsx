@@ -47,7 +47,7 @@ function TagInput({
   const chip = tone === "danger" ? "bg-danger text-white" : "bg-warning-soft text-warning";
   return (
     <div className="grid gap-2">
-      <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border border-ink-300 bg-white px-2 py-1.5 focus-within:border-navy-500 focus-within:ring-2 focus-within:ring-navy-100">
+      <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border border-ink-300 bg-white px-2 py-1.5 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-100">
         {values.map((v) => (
           <span key={v} className={cn("inline-flex items-center gap-1 rounded-full py-0.5 pr-1 pl-2.5 text-sm font-medium", chip)}>
             {v}
@@ -196,7 +196,7 @@ export function PatientForm({ patient }: { patient?: Patient }) {
         <h1 className="text-xl font-semibold">{patient ? `แก้ไขข้อมูล · ${patient.hn}` : "ลงทะเบียนคนไข้ใหม่"}</h1>
         {!patient && <span className="text-sm text-ink-500">ระบบออก HN ให้อัตโนมัติ</span>}
         <span className="flex-1" />
-        <Button variant="secondary" disabled title="ต้องติดตั้ง DBDente Bridge ที่เครื่องเคาน์เตอร์ (Phase 2)">
+        <Button variant="secondary" disabled title="ต้องติดตั้ง DBDenté Bridge ที่เครื่องเคาน์เตอร์ (Phase 2)">
           <CreditCard />
           อ่านจากบัตรประชาชน
         </Button>

@@ -181,7 +181,7 @@ export function AppointmentCalendar() {
             นัดใหม่
           </Button>
         )}
-        <span title={live ? "อัปเดตอัตโนมัติ" : "กำลังเชื่อมต่อ…"} className={cn("size-2.5 rounded-full", live ? "bg-success" : "bg-ink-300")} />
+        <span title={live ? "อัปเดตอัตโนมัติ" : "กำลังเชื่อมต่อ…"} className={cn("size-2.5 rounded-full", live ? "bg-teal-500" : "bg-ink-300")} />
       </div>
 
       <div ref={scroller} className="min-h-0 flex-1 overflow-auto bg-white">
@@ -245,7 +245,7 @@ export function AppointmentCalendar() {
                         draggable(a) ? "cursor-grab touch-none" : "cursor-pointer",
                         a.status === "done" && "opacity-60",
                         hidden && "opacity-50 line-through",
-                        a.status === "in_room" && "ring-2 ring-navy-500",
+                        a.status === "in_room" && "ring-2 ring-teal-500",
                         dragging && "z-20 cursor-grabbing opacity-90 shadow-lg",
                       )}
                       style={{ top, height, transform: dragging ? `translate(${drag.dx}px, ${drag.dy}px)` : undefined }}

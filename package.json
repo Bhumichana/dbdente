@@ -1,7 +1,7 @@
 {
   "name": "dbdente",
   "private": true,
-  "description": "DBDente — Dental clinic management + integrated Web DICOM (Phase 0 demo)",
+  "description": "DBDenté — Dental clinic management + integrated Web DICOM (Phase 0 demo)",
   "scripts": {
     "setup": "npm install && npm --prefix apps/api install && npm --prefix apps/web install && npm --prefix apps/api run seed",
     "seed": "npm --prefix apps/api run seed",

@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 /*
- * DBDente design tokens — โทน navy + ขาว (ดูแผน UI)
- *  navy-*   สีแบรนด์: โครง เมนู ปุ่มหลัก (primary = navy-700)
+ * DBDenté design tokens — Deep Navy + Medical Teal + White (ดูแผน UI)
+ *  navy-*   สีแบรนด์หลัก: โครง เมนู หัวข้อ ปุ่มหลัก (primary = navy-700)
+ *  teal-*   สีเน้น (accent): สถานะที่เลือก/active, focus ring, ลิงก์ (teal-700), ไฟ live/ออนไลน์,
+ *           สีข้อมูลลำดับแรกในกราฟ (teal-500 แล้วตามด้วย navy-500 — ผ่าน validator สีกราฟแล้ว)
+ *           ห้ามใช้แทนสีความหมาย success (เขียว) หรือสีผังฟัน
  *  ink-*    neutral อมน้ำเงิน แทน slate: พื้น เส้น ตัวอักษร
  *  viewer-* พื้นที่อ่านฟิล์ม (มืดเสมอ)
  *  danger/success/warning  สีความหมาย แยกจากแบรนด์ — แดงสงวนให้แพ้ยา/แผนการรักษา
@@ -23,6 +26,18 @@
   --color-navy-800: #163463;
   --color-navy-900: #10264a;
   --color-navy-950: #0b1b33;
+
+  --color-teal-50: #effaf9;
+  --color-teal-100: #d5f2ef;
+  --color-teal-200: #ade4df;
+  --color-teal-300: #7ccfc8;
+  --color-teal-400: #43b3ab;
+  --color-teal-500: #14988f;
+  --color-teal-600: #0c7d77;
+  --color-teal-700: #0c6662;
+  --color-teal-800: #0e5250;
+  --color-teal-900: #0f4442;
+  --color-teal-950: #052a2a;
 
   --color-ink-50: #f5f7fb;
   --color-ink-100: #eef1f6;
@@ -73,7 +88,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-navy-500);
+  outline: 2px solid var(--color-teal-500);
   outline-offset: 2px;
 }
 

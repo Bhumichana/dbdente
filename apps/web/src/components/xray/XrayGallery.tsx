@@ -188,7 +188,7 @@ export function XrayGallery({
                 className={cn(
                   "relative shrink-0 overflow-hidden rounded-lg bg-black ring-2",
                   layout === "strip" && "w-32",
-                  isOpen ? "ring-navy-500" : "ring-transparent",
+                  isOpen ? "ring-teal-500" : "ring-transparent",
                 )}
               >
                 <button onClick={() => onOpen([img.sopInstanceUid])} className="block h-24 w-full" title="เปิดใน Viewer">

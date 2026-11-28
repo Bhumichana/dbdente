@@ -68,8 +68,8 @@ export function BridgeStatus() {
             <div className="flex items-center gap-2">
               <Cable className="size-5 text-navy-600" />
               <b className="flex-1 text-ink-900">{b.name}</b>
-              <span className={cn("flex items-center gap-1.5 text-sm font-medium", b.online ? "text-success" : "text-ink-500")}>
-                <span className={cn("size-2.5 rounded-full", b.online ? "bg-success" : "bg-ink-300")} />
+              <span className={cn("flex items-center gap-1.5 text-sm font-medium", b.online ? "text-teal-700" : "text-ink-500")}>
+                <span className={cn("size-2.5 rounded-full", b.online ? "bg-teal-500" : "bg-ink-300")} />
                 {b.online ? "ออนไลน์" : "ออฟไลน์"}
               </span>
             </div>
@@ -161,7 +161,7 @@ export function BridgeStatus() {
             <li key={f.id} className="flex flex-wrap items-center gap-3 px-4 py-2.5 text-sm">
               <span className="min-w-0 flex-1 truncate font-mono">{f.fileName}</span>
               {f.patient && (
-                <Link href={`/patients/${f.patient.id}?tab=chart`} className="text-navy-700 hover:underline">
+                <Link href={`/patients/${f.patient.id}?tab=chart`} className="text-teal-700 hover:underline">
                   {f.patient.fullName}
                 </Link>
               )}

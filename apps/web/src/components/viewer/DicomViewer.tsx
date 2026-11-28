@@ -227,7 +227,7 @@ export default function DicomViewer({ patientId, images }: { patientId: string; 
             key={img.sopInstanceUid + i}
             onPointerDown={() => setActive(i)}
             className={`relative min-h-0 overflow-hidden rounded ${
-              images.length > 1 && active === i ? "ring-2 ring-navy-500" : "ring-1 ring-viewer-line"
+              images.length > 1 && active === i ? "ring-2 ring-teal-400" : "ring-1 ring-viewer-line"
             }`}
           >
             <div

@@ -72,7 +72,7 @@ export function Kiosk() {
       <header className="flex items-center gap-3 bg-navy-950 px-5 py-3 text-white">
         <Tablet className="size-5 text-navy-200" />
         <span className="font-semibold">{doc?.clinicName ?? "เอกสารยินยอม"}</span>
-        <span className={cn("ml-2 size-2 rounded-full", live ? "bg-success" : "bg-ink-500")} aria-label={live ? "เชื่อมต่อแล้ว" : "ออฟไลน์"} />
+        <span className={cn("ml-2 size-2 rounded-full", live ? "bg-teal-500" : "bg-ink-500")} aria-label={live ? "เชื่อมต่อแล้ว" : "ออฟไลน์"} />
         <span className="flex-1" />
         <button onClick={() => setUnlocking(true)} aria-label="ออกจากโหมด Kiosk (เจ้าหน้าที่)" className="rounded-lg p-2 text-navy-200 hover:bg-navy-800">
           <Lock className="size-5" />

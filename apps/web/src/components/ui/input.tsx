@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 
 const FIELD =
   "w-full rounded-lg border border-ink-300 bg-white px-3 text-sm text-ink-900 placeholder:text-ink-400 transition-colors " +
-  "focus:border-navy-500 focus:outline-none focus:ring-2 focus:ring-navy-100 disabled:bg-ink-50 disabled:text-ink-500 " +
+  "focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-100 disabled:bg-ink-50 disabled:text-ink-500 " +
   "aria-[invalid=true]:border-danger aria-[invalid=true]:ring-danger-soft";
 
 export function Input({ className, ...p }: InputHTMLAttributes<HTMLInputElement>) {

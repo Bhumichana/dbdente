@@ -77,10 +77,10 @@ export function QueueDisplay() {
   return (
     <div className="flex h-dvh flex-col bg-navy-950 text-white select-none">
       <header className="flex items-center gap-4 bg-navy-900 px-8 py-4">
-        <span className="flex size-11 items-center justify-center rounded-xl bg-navy-700 text-xl font-bold ring-1 ring-navy-500">D</span>
+        <span className="flex size-11 items-center justify-center rounded-xl bg-navy-700 text-xl font-bold ring-1 ring-teal-400/70">D</span>
         <span className="text-2xl font-semibold">{clinicName}</span>
         <span className="flex-1" />
-        <span className={cn("size-3 rounded-full", live ? "bg-success" : "bg-ink-500")} title={live ? "เชื่อมต่อแล้ว" : "กำลังเชื่อมต่อ"} />
+        <span className={cn("size-3 rounded-full", live ? "bg-teal-400" : "bg-ink-500")} title={live ? "เชื่อมต่อแล้ว" : "กำลังเชื่อมต่อ"} />
         <span className="font-mono text-3xl tabular-nums">{clock.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>
       </header>
 
